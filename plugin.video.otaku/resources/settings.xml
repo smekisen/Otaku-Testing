@@ -196,7 +196,7 @@
 		<setting type="lsep" label="40567"/>
 		<setting id="consistent.torrentInspection" type="bool" label="40568" default="false" />
 		<setting id="consistent.prioritize_season" type="bool" subsetting="true" label="40572" default="false" visible="eq(-1,true)" />
-		<setting id="consistent.prioritize_part" type="bool" subsetting="true" label="40573" default="false" visible="eq(-2,true)" />\
+		<setting id="consistent.prioritize_part" type="bool" subsetting="true" label="40573" default="false" visible="eq(-2,true)" />
 		<setting id="consistent.prioritize_episode" type="bool" subsetting="true" label="40574" default="false" visible="eq(-3,true)" />
 
 		<!-- Cloud Scraping -->
@@ -207,6 +207,7 @@
 		<!-- Local Scraping -->
 		<setting type="lsep" label="40546"/>
 		<setting id="scraping.localInspection" type="bool" label="40549" default="false" />
+		<setting id="download.location" subsetting="true" label="40576" type="folder" option="writeable" default="" visible="eq(-1,true)" />
 	</category>
 
 	<!-- Playback -->
