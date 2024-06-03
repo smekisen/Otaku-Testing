@@ -1,10 +1,11 @@
-import xbmcgui, xbmcvfs
+import xbmcgui
 import json
 import os
 import math
 import time
 
 from six.moves import urllib_request, urllib_parse
+from kodi_six import xbmcvfs
 from resources.lib.windows.base_window import BaseWindow
 from resources.lib.ui import database, control
 
