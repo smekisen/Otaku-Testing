@@ -232,7 +232,7 @@ class Manager:
                         data = json.load(file)
                     if data[self.url_hash].get('canceled'):
                         os.remove(self.output_path)
-                        control.notify("Download Canceled")
+                        control.notify(control.ADDON_NAME, "Download Canceled")
                         break
                     f.write(chunk)
                     self.update_status(len(chunk))
