@@ -41,7 +41,6 @@ If you guys are having problems with Otaku, please feel free to contact me or ta
 
 **_Function_**:
 - TVDB Episode Meta. (We Manage to find an api to help us with that)
-- Watchlist Completed Indicators.
 
 **_Optional_**:
 - Accounts: Adding an Easy News Debrid Provider.
