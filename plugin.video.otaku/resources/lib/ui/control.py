@@ -45,8 +45,8 @@ mappingDB_lock = threading.Lock()
 torrentScrapeCacheFile = os.path.join(dataPath, 'torrentScrape.db')
 torrentScrapeCacheFile_lock = threading.Lock()
 
-maldubFile = os.path.join(dataPath, 'mal_dub.json')
 downloads_json = os.path.join(dataPath, 'downloads.json')
+completed_json = os.path.join(dataPath, 'completed.json')
 
 showDialog = xbmcgui.Dialog()
 dialogWindow = xbmcgui.WindowDialog
