@@ -443,6 +443,10 @@ def draw_items(video_data, contentType="tvshows", draw_cm=[], bulk_add=False):
             elif contentType == 'episodes':
                 xbmc.executebuiltin('Container.SetViewMode(%d)' % get_view_type(getSetting('general.episode.view')))
 
+    if getSetting('watchlist.update.enabled') == 'false':
+        if os.path.exists(completed_json):
+            os.remove(completed_json)
+
     if contentType == "episodes" and getSetting('general.smartscroll') == 'true':
         sleep(int(getSetting('general.smartscroll.wait.time')))
         try:
