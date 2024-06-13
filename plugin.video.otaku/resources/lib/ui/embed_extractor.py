@@ -281,9 +281,10 @@ def __extract_dood(url, page_content, referer=None):
         token = match.group(2)
         nurl = 'https://{0}{1}'.format(host, match.group(1))
         html = client.request(nurl, referer=url)
-        headers = {'User-Agent': _EDGE_UA,
-                   'Referer': url}
-        return dood_decode(html) + token + str(int(time.time() * 1000)) + __append_headers(headers)
+        if html != '{}':
+            headers = {'User-Agent': _EDGE_UA,
+                       'Referer': url}
+            return dood_decode(html) + token + str(int(time.time() * 1000)) + __append_headers(headers)
     return
 
 
@@ -485,7 +486,8 @@ __register_extractor(["https://gogo-stream.com/",
                       "https://playtaku.online/",
                       "https://gotaku1.com/",
                       "https://goone.pro/",
-                      "https://embtaku.pro/"],
+                      "https://embtaku.pro/",
+                      "https://embtaku.com/"],
                      __extract_goload)
 
 __register_extractor(["https://streamtape.com/e/"],
