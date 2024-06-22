@@ -607,6 +607,10 @@ def toggle_reuselanguageinvoker(forced_state=None):
             break
 
 
+def clearGlobalProp(property):
+    xbmcgui.Window(10000).clearProperty(property)
+
+
 def setGlobalProp(property, value):
     xbmcgui.Window(10000).setProperty(property, str(value))
 
