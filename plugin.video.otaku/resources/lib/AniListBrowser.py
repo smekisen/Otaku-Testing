@@ -5392,6 +5392,6 @@ class AniListBrowser():
         try:
             with open(control.completed_json) as file:
                 completed = json.load(file)
-        except FileNotFoundError:
+        except:
             completed = {}
         return completed

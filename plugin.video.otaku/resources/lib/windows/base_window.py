@@ -50,11 +50,11 @@ class BaseWindow(control.xmlWindow):
         else:
             if isinstance(fanart, list):
                 if control.getSetting('context.fanart.select') == 'true':
-                    fanart_select = control.getSetting(f'fanart.select.anilist.{anilist_id}')
+                    fanart_select = control.getSetting('fanart.select.anilist.{}'.format(anilist_id))
                     fanart = fanart_select if fanart_select else random.choice(fanart)
                 else:
                     fanart = random.choice(fanart)
-        
+
         if isinstance(clearlogo, list) and len(clearlogo) > 0:
             clearlogo = control.OTAKU_LOGO2_PATH if control.getSetting('disable.clearlogo') == 'true' else random.choice(clearlogo)
 
