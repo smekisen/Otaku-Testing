@@ -22,7 +22,7 @@ class sources(BrowserBase):
         title = self._clean_title(title)
 
         all_results = []
-        srcs = ['softsub', 'dub', 'sub']
+        srcs = ['softsub', 'sub', 'dub']
         if control.getSetting('general.source') == 'Sub':
             srcs.remove('dub')
         elif control.getSetting('general.source') == 'Dub':
@@ -111,6 +111,7 @@ class sources(BrowserBase):
                     XHR=True
                 )
                 eres = json.loads(r).get('result')
+                scrapes = 0
                 for lang in langs:
                     elink = SoupStrainer('div', {'data-type': lang})
                     sdiv = BeautifulSoup(eres, "html.parser", parse_only=elink)
@@ -119,7 +120,9 @@ class sources(BrowserBase):
                         edata_id = src.get('data-link-id')
                         edata_name = src.text
                         if edata_name.lower() in control.enabled_embeds():
-                            control.sleep(5000)
+                            if scrapes == 3:
+                                control.sleep(5000)
+                                scrapes = 0
                             vrf = self.generate_vrf(edata_id)
                             params = {'vrf': vrf}
                             r = self._get_request(
@@ -128,6 +131,7 @@ class sources(BrowserBase):
                                 headers=headers,
                                 XHR=True
                             )
+                            scrapes += 1
                             resp = json.loads(r).get('result')
                             slink = self.decrypt_vrf(resp.get('url'))
 
@@ -149,7 +153,7 @@ class sources(BrowserBase):
                                 'debrid_provider': '',
                                 'provider': 'aniwave',
                                 'size': 'NA',
-                                'info': ['DUB' if lang == 'dub' else 'SUB', edata_name],
+                                'info': [lang, edata_name],
                                 'lang': 2 if lang == 'dub' else 0,
                                 'skip': skip
                             }
