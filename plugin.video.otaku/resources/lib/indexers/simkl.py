@@ -1,238 +1,197 @@
-import json
+import requests
 import pickle
-import random
+import datetime
 import time
 
 from functools import partial
-from resources.lib.ui import client, database, utils, control
-from resources.lib.indexers.syncurl import SyncUrl
+from resources.lib.ui import database, utils, control
+from resources.lib import indexers
+from resources import jz
 
 
 class SIMKLAPI:
     def __init__(self):
-        self.ClientID = "59dfdc579d244e1edf6f89874d521d37a69a95a1abd349910cb056a1872ba2c8"
-        self.baseUrl = "https://api.simkl.com/"
+        # self.ClientID = "5178a709b7942f1f5077b737b752eea0f6dee684d0e044fa5acee8822a0cbe9b" # Swag API Key
+        # self.ClientID = "503b6b37476926a7a17ac86b95a81b245879955a7531e3e7d8913c0624796ea0" # My API key
+
+        self.ClientID = "59dfdc579d244e1edf6f89874d521d37a69a95a1abd349910cb056a1872ba2c8"  # Otaku API key
+        self.baseUrl = "https://api.simkl.com"
         self.imagePath = "https://wsrv.nl/?url=https://simkl.in/episodes/%s_w.webp"
 
-    def _to_url(self, url=''):
-        if url.startswith("/"):
-            url = url[1:]
-        return "%s/%s" % (self.baseUrl[:-1], url)
-
-    @staticmethod
-    def _json_request(url, data=''):
-        response = database.get(client.request, 4, url, params=data, error=True)
-        response = json.loads(response)
-        return response
-
-    def _parse_episode_view(self, res, anilist_id, season, poster, fanart, eps_watched, update_time, tvshowtitle,
-                            filter_lang, title_disable):
-
-        url = "%s/%s/" % (anilist_id, res['episode'])
-
-        if filter_lang:
-            url += filter_lang
-
+    def parse_episode_view(self, res, anilist_id, season, poster, fanart, eps_watched, update_time, tvshowtitle, dub_data, filler_data, episodes=None):
+        episode = int(res['episode'])
+        url = f"{anilist_id}/{episode}"
         title = res.get('title')
         if not title:
-            title = "Episode %s" % res["episode"]
-
+            title = f'Episode {episode}'
         image = self.imagePath % res['img'] if res.get('img') else poster
-        show_art = {}
-        show_meta = database.get_show_meta(anilist_id)
-        if show_meta and show_meta.get('art'):
-            show_art = pickle.loads(show_meta.get('art'))
-        clearart = clearlogo = landscape = banner = None
-        cast = []
-        if show_art:
-            if show_art.get('clearart'):
-                clearart = random.choice(show_art['clearart'])
-            if show_art.get('clearlogo'):
-                clearlogo = random.choice(show_art['clearlogo'])
-            if show_art.get('banner'):
-                banner = show_art['banner']
-            if show_art.get('landscape'):
-                landscape = show_art['landscape']
-
         info = {
-            'unique_ids': {'anilist_id': str(anilist_id)},
+            'UniqueIDs': {'anilist_id': str(anilist_id)},
             'plot': res.get('description', ''),
-            'title': res['title'],
+            'title': title,
             'season': season,
-            'episode': int(res['episode']),
+            'episode': episode,
             'tvshowtitle': tvshowtitle,
             'mediatype': 'episode'
         }
+        if eps_watched and int(eps_watched) >= episode:
+            info['playcount'] = 1
 
-        if eps_watched:
-            if int(eps_watched) >= res['episode']:
-                info['playcount'] = 1
-
-        aired = ''
         try:
             info['aired'] = res['date'][:10]
-            aired = res['date'][:10]
-        except:
+
+        except KeyError:
             pass
-
-        parsed = utils.allocate_item(title, "play/%s" % url, False, image, info, fanart, poster, cast, landscape, banner, clearart, clearlogo)
-        database._update_episode(anilist_id, season, res['episode'], '', update_time, parsed, air_date=aired)
-
-        if title_disable and info.get('playcount') != 1:
-            parsed['info']['title'] = 'Episode %s' % res["episode"]
-            parsed['info']['plot'] = "None"
-
-        return parsed
-
-    def _process_episode_view(self, anilist_id, poster, fanart, eps_watched, tvshowtitle, filter_lang, title_disable):
-        from datetime import date
-        update_time = date.today().isoformat()
-        all_results = []
-        result = database.get(self.get_anime_info, 6, anilist_id)
-        result_ep = database.get(self.get_anilist_meta, 6, anilist_id)
-
-        if result_ep:
-            season = result.get('season') if result else '1'
-            s_id = database.get_tvdb_season(anilist_id)
-            if not s_id:
-                sync_data = SyncUrl().get_anime_data(anilist_id, 'Anilist')
-                s_id = utils.get_season(sync_data[0]) if sync_data else None
-            if isinstance(s_id, list) and s_id:
-                season = s_id[0]
-            elif isinstance(s_id, int):
-                season = s_id
-            else:
-                season = 1
-
-            season = int(season)
-            database._update_season(anilist_id, season)
-
-            result_ep = [x for x in result_ep if x['type'] == 'episode']
-
-            mapfunc = partial(self._parse_episode_view, anilist_id=anilist_id, season=season, poster=poster, fanart=fanart,
-                              eps_watched=eps_watched, filter_lang=filter_lang, update_time=update_time,
-                              tvshowtitle=tvshowtitle, title_disable=title_disable)
-            all_results = list(map(mapfunc, result_ep))
-
-        return all_results
-
-    def _append_episodes(self, anilist_id, episodes, eps_watched, poster, fanart, tvshowtitle, filter_lang,
-                         title_disable):
-        import datetime
-        update_time = datetime.date.today().isoformat()
-        last_updated = datetime.datetime(*(time.strptime(episodes[0]['last_updated'], "%Y-%m-%d")[0:6]))
-        diff = (datetime.datetime.today() - last_updated).days
-
-        result_ep = database.get(self.get_anilist_meta, 6, anilist_id) if diff > 0 else {}
-        result_ep = [x for x in result_ep if x['type'] == 'episode']
-
-        if len(result_ep) > len(episodes):
-            season = database.get_season_list(anilist_id)['season']
-            mapfunc2 = partial(self._parse_episode_view, anilist_id=anilist_id, season=season, poster=poster, fanart=fanart,
-                               eps_watched=eps_watched, update_time=update_time, tvshowtitle=tvshowtitle,
-                               filter_lang=filter_lang, title_disable=title_disable)
-            all_results = list(map(mapfunc2, result_ep))
-        else:
-            mapfunc1 = partial(self._parse_episodes, eps_watched=eps_watched, title_disable=title_disable)
-            all_results = list(map(mapfunc1, episodes))
-
-        return all_results
-
-    @staticmethod
-    def _parse_episodes(res, eps_watched, title_disable):
-        parsed = pickle.loads(res['kodi_meta'])
 
         try:
-            if int(eps_watched) >= res['number']:
-                parsed['info']['playcount'] = 1
-        except:
-            pass
+            filler = filler_data[episode - 1]
+        except (IndexError, TypeError):
+            filler = ''
+        code = jz.get_second_label(info, dub_data)
+        if not code and control.settingids.filler:
+            filler = code = control.colorstr(filler, color="red") if filler == 'Filler' else filler
+        info['code'] = code
 
-        if title_disable and parsed['info'].get('playcount') != 1:
-            parsed['info']['title'] = 'Episode %s' % res["number"]
-            parsed['info']['plot'] = "None"
+        parsed = utils.allocate_item(title, f"play/{url}", False, True, image, info, fanart, poster)
 
+        kodi_meta = pickle.dumps(parsed)
+        if not episodes or not any(x['kodi_meta'] == kodi_meta for x in episodes):
+            database.update_episode(anilist_id, season, episode, update_time, kodi_meta, filler=filler)
+
+        if control.settingids.clean_titles and info.get('playcount') != 1:
+            parsed['info']['title'] = f'Episode {res["episode"]}'
+            parsed['info']['plot'] = None
         return parsed
 
-    def _process_episodes(self, episodes, eps_watched, title_disable=False):
-        mapfunc = partial(self._parse_episodes, eps_watched=eps_watched, title_disable=title_disable)
-        all_results = list(map(mapfunc, episodes))
+    def process_episode_view(self, anilist_id, poster, fanart, eps_watched, tvshowtitle, dub_data, filler_data):
+        update_time = datetime.date.today().isoformat()
+
+        result = self.get_anime_info(anilist_id)
+        if not result:
+            return []
+
+        title_list = [name['name'] for name in result['alt_titles']]
+        season = utils.get_season(title_list) if int(result.get('season', 1)) == 1 else int(result['season'])
+
+        result_meta = self.get_episode_meta(anilist_id)
+        result_ep = [x for x in result_meta if x['type'] == 'episode']
+
+        mapfunc = partial(self.parse_episode_view, anilist_id=anilist_id, season=season, poster=poster, fanart=fanart, eps_watched=eps_watched, update_time=update_time, tvshowtitle=tvshowtitle, dub_data=dub_data, filler_data=filler_data)
+        all_results = list(map(mapfunc, result_ep))
+        if control.settingids.show_empty_eps:
+            total_ep = result.get('total_episodes', 0)
+            empty_ep = []
+            for ep in range(len(all_results) + 1, total_ep + 1):
+                empty_ep.append({
+                    # 'title': control.colorString(f'Episode {ep}', 'red'),
+                    'title': f'Episode {ep}',
+                    'episode': ep,
+                    'image': poster
+                })
+            mapfunc_emp = partial(self.parse_episode_view, anilist_id=anilist_id, season=season, poster=poster, fanart=fanart, eps_watched=eps_watched, update_time=update_time, tvshowtitle=tvshowtitle, dub_data=dub_data, filler_data=filler_data)
+            all_results += list(map(mapfunc_emp, empty_ep))
+
+        control.notify("SIMKL", f'{tvshowtitle} Added to Database', icon=poster)
         return all_results
 
-    def get_episodes(self, anilist_id, filter_lang):
+    def append_episodes(self, anilist_id, episodes, eps_watched, poster, fanart, tvshowtitle, dub_data=None):
+        update_time = datetime.date.today().isoformat()
+        last_updated = datetime.datetime.fromtimestamp(time.mktime(time.strptime(episodes[0].get('last_updated'), '%Y-%m-%d')))
+        diff = (datetime.datetime.today() - last_updated).days
+        result_meta = self.get_episode_meta(anilist_id) if diff > int(control.getSetting('interface.check.updates')) else []
+        result_ep = [x for x in result_meta if x['type'] == 'episode']
+
+        if len(result_ep) > len(episodes):
+            season = episodes[0]['season']
+            mapfunc2 = partial(self.parse_episode_view, episodes=episodes, anilist_id=anilist_id, season=season, poster=poster, fanart=fanart, eps_watched=eps_watched, update_time=update_time, tvshowtitle=tvshowtitle, dub_data=dub_data, filler_data=None)
+            all_results = list(map(mapfunc2, result_ep))
+            control.notify("SIMKL Appended", f'{tvshowtitle} Appended to Database', icon=poster)
+        else:
+            database.update_episode(anilist_id, episodes[0]['season'], episodes[0]['number'], update_time, episodes[0]['kodi_meta'], episodes[0]['filler'])
+            mapfunc1 = partial(indexers.parse_episodes, eps_watched=eps_watched, dub_data=dub_data)
+            all_results = list(map(mapfunc1, episodes))
+        return all_results
+
+    def get_episodes(self, anilist_id, show_meta):
         kodi_meta = pickle.loads(database.get_show(anilist_id)['kodi_meta'])
-        show_meta = database.get_show_meta(anilist_id)
-
-        if show_meta:
-            kodi_meta.update(pickle.loads(show_meta.get('art')))
-
+        kodi_meta.update(pickle.loads(show_meta['art']))
         fanart = kodi_meta.get('fanart')
         poster = kodi_meta.get('poster')
         tvshowtitle = kodi_meta['title_userPreferred']
-        eps_watched = kodi_meta.get('eps_watched')
+        if not (eps_watched := kodi_meta.get('eps_watched')) and control.settingids.watchlist_data:
+            from resources.lib.WatchlistFlavor import WatchlistFlavor
+            flavor = WatchlistFlavor.get_update_flavor()
+            if flavor:
+                data = flavor.get_watchlist_anime_entry(anilist_id)
+                if data.get('eps_watched'):
+                    eps_watched = kodi_meta['eps_watched'] = data['eps_watched']
+                    database.update_kodi_meta(anilist_id, kodi_meta)
         episodes = database.get_episode_list(anilist_id)
-
-        title_disable = control.getSetting('general.spoilers') == 'true'
+        dub_data = indexers.process_dub(anilist_id, kodi_meta['ename']) if control.getSetting('jz.dub') == 'true' else None
         if episodes:
             if kodi_meta['status'] != "FINISHED":
-                return self._append_episodes(anilist_id, episodes, eps_watched, poster, fanart, tvshowtitle,
-                                             filter_lang, title_disable), 'episodes'
-            return self._process_episodes(episodes, eps_watched, title_disable), 'episodes'
-
-        return self._process_episode_view(anilist_id, poster, fanart, eps_watched, tvshowtitle, filter_lang,
-                                          title_disable), 'episodes'
+                return self.append_episodes(anilist_id, episodes, eps_watched, poster, fanart, tvshowtitle, dub_data), 'episodes'
+            return indexers.process_episodes(episodes, eps_watched, dub_data), 'episodes'
+        if kodi_meta['episodes'] is None or kodi_meta['episodes'] > 99:
+            from resources.jz import anime_filler
+            filler_data = anime_filler.get_data(kodi_meta['ename'])
+        else:
+            filler_data = None
+        return self.process_episode_view(anilist_id, poster, fanart, eps_watched, tvshowtitle, dub_data, filler_data), 'episodes'
 
     def get_anime_info(self, anilist_id):
-        show = database.get_show(anilist_id)
-        simkl_id = show['simkl_id']
+        show_ids = database.get_show(anilist_id)
+        if not (simkl_id := show_ids['simkl_id']):
+            simkl_id = self.get_id('anilist', anilist_id)
+            if not simkl_id:
+                mal_id = database.get_mappings(anilist_id, 'anilist_id').get('mal_id')
+                if not mal_id:
+                    return
+                simkl_id = self.get_id('mal', mal_id)
+            database.add_mapping_id(anilist_id, 'simkl_id', simkl_id)
+
+        params = {
+            'extended': 'full',
+            'client_id': self.ClientID
+        }
+        r = requests.get(f'{self.baseUrl}/anime/{simkl_id}', params=params)
+        res = r.json() if r.ok else {}
+        return res
+
+    def get_episode_meta(self, anilist_id):
+        show_ids = database.get_show(anilist_id)
+        simkl_id = show_ids['simkl_id']
         if not simkl_id:
-            simkl_id = self.get_simkl_id('anilist', anilist_id)
+            mal_id = show_ids['mal_id']
+            simkl_id = self.get_id('mal', mal_id)
             database.add_mapping_id(anilist_id, 'simkl_id', simkl_id)
         params = {
             'extended': 'full',
             'client_id': self.ClientID
         }
-        r = client.request(self.baseUrl + "anime/" + str(simkl_id), params=params)
-        res = json.loads(r)
+        r = requests.get(f'{self.baseUrl}/anime/episodes/{simkl_id}', params=params)
+        res = r.json()
         return res
 
-    def get_anilist_meta(self, anilist_id):
-        show_ids = database.get_show(anilist_id)
-        simkl_id = show_ids['simkl_id']
-        if not simkl_id:
-            mal_id = show_ids['mal_id']
-            simkl_id = self.get_simkl_id('mal', mal_id)
-            if simkl_id:
-                database.add_mapping_id(anilist_id, 'simkl_id', simkl_id)
-        res = []
-        if simkl_id:
-            params = {
-                'extended': 'full',
-                'client_id': self.ClientID
-            }
-            r = client.request(self.baseUrl + "anime/episodes/" + str(simkl_id), params=params)
-            res = json.loads(r)
-        return res
-
-    def get_simkl_id(self, send_id, anime_id):
+    def get_id(self, send_id, anime_id):
         params = {
             send_id: anime_id,
             "client_id": self.ClientID,
         }
-        anime_id = ''
-        r = client.request('{0}search/id'.format(self.baseUrl), params=params)
-        r = json.loads(r)
+        r = requests.get(f'{self.baseUrl}/search/id', params=params)
+        r = r.json()
         if r:
             anime_id = r[0]['ids']['simkl']
-        return anime_id
+            return anime_id
 
     def get_mapping_ids(self, send_id, anime_id):
-        simkl_id = self.get_simkl_id(send_id, anime_id)
+        # return_id = anidb, ann, mal, offjp, wikien, wikijp, instagram, imdb, tmdb, tw, tvdbslug, anilist, animeplanet, anisearch, kitsu, livechart, traktslug
+        simkl_id = self.get_id(send_id, anime_id)
         params = {
             'extended': 'full',
             'client_id': self.ClientID
         }
-        r = client.request('{0}/anime/{1}'.format(self.baseUrl, simkl_id), params=params)
-        if r:
-            r = json.loads(r)
+        r = requests.get(f'{self.baseUrl}/anime/{simkl_id}', params=params)
+        if r.ok:
+            r = r.json()
             return r['ids']

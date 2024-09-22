@@ -1,12 +1,11 @@
 from resources.lib.ui import control
-from resources.lib.WatchlistFlavor import AniList, Kitsu, MyAnimeList, Simkl  # noQA
+from resources.lib.WatchlistFlavor import AniList, Kitsu, MyAnimeList, Simkl
 from resources.lib.WatchlistFlavor.WatchlistFlavorBase import WatchlistFlavorBase
 
 
 class WatchlistFlavor:
     __LOGIN_KEY = "addon.login"
     __LOGIN_FLAVOR_KEY = "%s.flavor" % __LOGIN_KEY
-
     __SELECTED = None
 
     def __init__(self):
@@ -15,17 +14,16 @@ class WatchlistFlavor:
     @staticmethod
     def get_enabled_watchlists():
         enabled_watchlists = []
-        if control.simkl_enabled():
-            enabled_watchlists.append(WatchlistFlavor.__instance_flavor('simkl'))
         if control.myanimelist_enabled():
             enabled_watchlists.append(WatchlistFlavor.__instance_flavor('mal'))
         if control.kitsu_enabled():
             enabled_watchlists.append(WatchlistFlavor.__instance_flavor('kitsu'))
         if control.anilist_enabled():
             enabled_watchlists.append(WatchlistFlavor.__instance_flavor('anilist'))
-
+        if control.simkl_enabled():
+            enabled_watchlists.append(WatchlistFlavor.__instance_flavor('simkl'))
         return enabled_watchlists
-    
+
     @staticmethod
     def get_enabled_watchlist_list():
         enabled_watchlists = []
@@ -43,7 +41,7 @@ class WatchlistFlavor:
     def get_update_flavor():
         selected = control.watchlist_to_update()
         if not selected:
-            return None
+            return
         if not WatchlistFlavor.__SELECTED:
             WatchlistFlavor.__SELECTED = WatchlistFlavor.__instance_flavor(selected)
         return WatchlistFlavor.__SELECTED
@@ -70,14 +68,8 @@ class WatchlistFlavor:
             raise Exception("Invalid flavor %s" % flavor)
 
         flavor_class = WatchlistFlavor.__instance_flavor(flavor)
-        login_result = flavor_class.login()
 
-        if not login_result:  # If login fails
-            control.setSetting('%s.username' % flavor, '')  # Clear the username
-            control.setSetting('%s.token' % flavor, '')  # Clear the token
-            return control.ok_dialog('Login', 'Incorrect username or password')
-
-        return WatchlistFlavor.__set_login(flavor, login_result)  # If login succeeds
+        return WatchlistFlavor.__set_login(flavor, flavor_class.login())
 
     @staticmethod
     def logout_request(flavor):
@@ -110,10 +102,9 @@ class WatchlistFlavor:
         username = control.getSetting('%s.username' % name)
         password = control.getSetting('%s.password' % name)
         sort = control.getSetting('%s.sort' % name)
-        title_lang = control.getSetting('%s.titles' % name)
 
         flavor_class = WatchlistFlavor.__get_flavor_class(name)
-        return flavor_class(auth_var, username, password, user_id, token, refresh, sort, title_lang)
+        return flavor_class(auth_var, username, password, user_id, token, refresh, sort)
 
     @staticmethod
     def __set_login(flavor, res):

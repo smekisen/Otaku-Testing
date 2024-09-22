@@ -1,10 +1,8 @@
-import itertools
-import json
-import pickle
-import random
+import requests
 
-from resources.lib.ui import control, database, get_meta
+from resources.lib.ui import utils, control
 from resources.lib.WatchlistFlavor.WatchlistFlavorBase import WatchlistFlavorBase
+from resources.lib.ui.divide_flavors import div_flavor
 
 
 class AniListWLF(WatchlistFlavorBase):
@@ -15,7 +13,7 @@ class AniListWLF(WatchlistFlavorBase):
 
     def __headers(self):
         headers = {
-            'Authorization': 'Bearer {0}'.format(self._token),
+            'Authorization': f'Bearer {self._token}',
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         }
@@ -26,17 +24,19 @@ class AniListWLF(WatchlistFlavorBase):
         query ($name: String) {
             User(name: $name) {
                 id
-                }
             }
+        }
         '''
 
         variables = {
             "name": self._username
         }
 
-        r = self._post_request(self._URL, headers=self.__headers(), json={'query': query, 'variables': variables})
-        results = json.loads(r)
+        r = requests.post(self._URL, headers=self.__headers(), json={'query': query, 'variables': variables})
+        results = r.json()
         if "errors" in results.keys():
+            control.setSetting('anilist.token', '')
+            control.setSetting('anilist.username', '')
             return
         userId = results['data']['User']['id']
         login_data = {
@@ -45,57 +45,43 @@ class AniListWLF(WatchlistFlavorBase):
         return login_data
 
     def __get_sort(self):
-        sort_types = {
-            "Score": "SCORE",
-            "Progress": "PROGRESS",
-            "Last Updated": "UPDATED_TIME",
-            "Last Added": "ADDED_TIME",
-            "Romaji Title": "MEDIA_TITLE_ROMAJI_DESC",
-            "English Title": "MEDIA_TITLE_ENGLISH_DESC"
-        }
-        return sort_types[self._sort]
+        sort_types = ['MEDIA_TITLE_ENGLISH_DESC', 'MEDIA_TITLE_ROMAJI_DESC', 'SCORE', 'PROGRESS', 'UPDATED_TIME', 'ADDED_TIME']
+        return sort_types[int(self._sort)]
 
     def watchlist(self):
         statuses = [
-            ("Next Up", "CURRENT?next_up=true"),
-            ("Current", "CURRENT"),
-            ("Plan to Watch", "PLANNING"),
-            ("Completed", "COMPLETED"),
-            ("Rewatching", "REPEATING"),
-            ("Paused", "PAUSED"),
-            ("Dropped", "DROPPED")
+            ("Next Up", "CURRENT?next_up=true", 'nextup.png'),
+            ("Current", "CURRENT", 'watching.png'),
+            ("Rewatching", "REPEATING", 'rewatching.png'),
+            ("Plan to Watch", "PLANNING", 'plantowatch.png'),
+            ("Paused", "PAUSED", 'onhold.png'),
+            ("Completed", "COMPLETED", 'completed.png'),
+            ("Dropped", "DROPPED", 'dropped.png')
         ]
-        all_results = map(self._base_watchlist_view, statuses)
-        all_results = list(itertools.chain(*all_results))
-        return all_results
+        return [utils.allocate_item(res[0], f'watchlist_status_type/{self._NAME}/{res[1]}', True, False, res[2]) for res in statuses]
 
     def _base_watchlist_view(self, res):
-        base = {
-            "name": res[0],
-            "url": 'watchlist_status_type/%s/%s' % (self._NAME, res[1]),
-            "image": '%s.png' % res[0].lower(),
-            "info": {}
-        }
-        return self._parse_view(base)
+        url = f'watchlist_status_type/{self._NAME}/{res[1]}'
+        return [utils.allocate_item(res[0], url, True, False, f'{res[0].lower()}.png')]
 
     @staticmethod
     def action_statuses():
         actions = [
             ("Add to Current", "CURRENT"),
-            ("Add to Planning", "PLANNING"),
-            ("Add to Completed", "COMPLETED"),
             ("Add to Rewatching", "REPEATING"),
+            ("Add to Planning", "PLANNING"),
             ("Add to Paused", "PAUSED"),
+            ("Add to Completed", "COMPLETED"),
             ("Add to Dropped", "DROPPED"),
             ("Set Score", "set_score"),
             ("Delete", "DELETE")
         ]
         return actions
 
-    def get_watchlist_status(self, status, next_up):
+    def get_watchlist_status(self, status, next_up, offset=0, page=1):
         query = '''
-        query ($userId: Int, $userName: String, $status: MediaListStatus, $type: MediaType, $sort: [MediaListSort]) {
-            MediaListCollection(userId: $userId, userName: $userName, status: $status, type: $type, sort: $sort) {
+        query ($userId: Int, $userName: String, $status: MediaListStatus, $type: MediaType, $sort: [MediaListSort], $forceSingleCompletedList: Boolean) {
+            MediaListCollection(userId: $userId, userName: $userName, status: $status, type: $type, sort: $sort, forceSingleCompletedList: $forceSingleCompletedList) {
                 lists {
                     entries {
                         ...mediaListEntry
@@ -109,7 +95,6 @@ class AniListWLF(WatchlistFlavorBase):
             mediaId
             status
             progress
-            customLists
             media {
                 id
                 idMal
@@ -181,43 +166,38 @@ class AniListWLF(WatchlistFlavorBase):
             'username': self._username,
             'status': status,
             'type': 'ANIME',
-            'sort': self.__get_sort()
+            'sort': self.__get_sort(),
+            'forceSingleCompletedList': False
         }
-        return self._process_status_view(query, variables, next_up, "watchlist/%d", page=1)
+        return self._process_status_view(query, variables, next_up)
 
-    def _process_status_view(self, query, variables, next_up, base_plugin_url, page):
-        r = self._post_request(self._URL, headers=self.__headers(), json={'query': query, 'variables': variables})
-        results = json.loads(r)
-
+    def _process_status_view(self, query, variables, next_up):
+        r = requests.post(self._URL, headers=self.__headers(), json={'query': query, 'variables': variables})
+        results = r.json()
         lists = results['data']['MediaListCollection']['lists']
         entries = []
         for mlist in lists:
             for entrie in mlist['entries']:
                 if entrie not in entries:
                     entries.append(entrie)
-        get_meta.collect_meta(entries)
-        
-        if control.getSetting('anilist.order') == '0':
-            all_results = map(self._base_next_up_view, reversed(entries)) if next_up else map(self._base_watchlist_status_view, reversed(entries))
-        else:
-            all_results = map(self._base_next_up_view, entries) if next_up else map(self._base_watchlist_status_view, entries)
 
-        all_results = [i for i in all_results if i is not None]
-        all_results = list(itertools.chain(*all_results))
-        
+        all_results = map(self._base_next_up_view, reversed(entries)) if next_up else map(self._base_watchlist_status_view, reversed(entries))
+        all_results = list(all_results)
         return all_results
 
-    def _base_watchlist_status_view(self, res):
+    @div_flavor
+    def _base_watchlist_status_view(self, res, mal_dub=None, dubsub_filter=None):
         progress = res['progress']
         res = res['media']
 
         anilist_id = res['id']
         mal_id = res.get('idMal', '')
-        kitsu_id = ''
+
+        dub = True if mal_dub and mal_dub.get(str(mal_id)) else False
+
         title = res['title'].get(self._title_lang) or res['title'].get('userPreferred')
 
         info = {
-            'unique_ids': {'anilist_id': str(anilist_id)},
             'title': title,
             'genre': res.get('genres'),
             'status': res.get('status'),
@@ -248,36 +228,25 @@ class AniListWLF(WatchlistFlavorBase):
             info['plot'] = desc
 
         try:
-            if res.get('trailer').get('site') == 'youtube':
-                info['trailer'] = 'plugin://plugin.video.youtube/play/?video_id={0}'.format(res.get('trailer').get('id'))
-            else:
-                info['trailer'] = 'plugin://plugin.video.dailymotion_com/?url={0}&mode=playVideo'.format(res.get('trailer').get('id'))
-        except:
-            pass
-
-        try:
             start_date = res.get('startDate')
             info['aired'] = '{}-{:02}-{:02}'.format(start_date['year'], start_date['month'], start_date['day'])
         except TypeError:
             pass
 
+        cast = []
         try:
-            cast = []
-            cast2 = []
-            for x in res['characters']['edges']:
+            for i, x in enumerate(res['characters']['edges']):
                 role = x['node']['name']['userPreferred']
                 actor = x['voiceActors'][0]['name']['userPreferred']
                 actor_hs = x['voiceActors'][0]['image'].get('large')
-                cast.append((actor, role))
-                cast2.append({'name': actor, 'role': role, 'thumbnail': actor_hs})
+                cast.append({'name': actor, 'role': role, 'thumbnail': actor_hs, 'index': i})
                 info['cast'] = cast
-                info['cast2'] = cast2
         except IndexError:
             pass
 
         base = {
             "name": '%s - %d/%d' % (title, progress, res['episodes'] if res['episodes'] else 0),
-            "url": 'watchlist_to_ep/{0}/{1}/{2}/{3}'.format(anilist_id, mal_id, kitsu_id, progress),
+            "url": f'watchlist_to_ep/{anilist_id}/{mal_id}/{progress}',
             "image": res['coverImage']['extraLarge'],
             "poster": res['coverImage']['extraLarge'],
             "fanart": res['coverImage']['extraLarge'],
@@ -285,24 +254,11 @@ class AniListWLF(WatchlistFlavorBase):
             "info": info
         }
 
-        show_meta = database.get_show_meta(anilist_id)
-        if show_meta:
-            art = pickle.loads(show_meta['art'])
-            if art.get('fanart'):
-                base['fanart'] = art['fanart']
-            if art.get('thumb'):
-                base['landscape'] = random.choice(art['thumb'])
-            if art.get('clearart'):
-                base['clearart'] = random.choice(art['clearart'])
-            if art.get('clearlogo'):
-                base['clearlogo'] = random.choice(art['clearlogo'])
-
         if res['format'] == 'MOVIE' and res['episodes'] == 1:
-            base['url'] = 'play_movie/{0}/{1}/{2}'.format(anilist_id, mal_id, kitsu_id)
+            base['url'] = f'play_movie/{anilist_id}/{mal_id}/'
             base['info']['mediatype'] = 'movie'
-            return self._parse_view(base, False)
-
-        return self._parse_view(base)
+            return utils.parse_view(base, False, True, dub=dub, dubsub_filter=dubsub_filter)
+        return utils.parse_view(base, True, False, dub=dub, dubsub_filter=dubsub_filter)
 
     def _base_next_up_view(self, res):
         progress = res['progress']
@@ -310,30 +266,28 @@ class AniListWLF(WatchlistFlavorBase):
 
         anilist_id = res['id']
         mal_id = res.get('idMal', '')
-        kitsu_id = ''
 
         next_up = progress + 1
-        episode_count = res['episodes'] if res['episodes'] is not None else 0
+        episode_count = res['episodes'] if res['episodes'] else 0
         base_title = res['title'].get(self._title_lang) or res['title'].get('userPreferred')
-        title = '%s - %s/%s' % (base_title, next_up, episode_count)
+        title = f"{base_title} - {next_up}/{episode_count}"
         poster = image = res['coverImage']['extraLarge']
-        plot = aired = None
 
         if (0 < episode_count < next_up) or (res['nextAiringEpisode'] and next_up == res['nextAiringEpisode']['episode']):
             return None
 
         anilist_id, next_up_meta, show = self._get_next_up_meta('', progress, anilist_id)
         if next_up_meta:
-            url = 'play/%d/%d/' % (anilist_id, next_up)
             if next_up_meta.get('title'):
-                title = '%s - %s' % (title, next_up_meta['title'])
+                title = f"{title} - {next_up_meta['title']}"
             if next_up_meta.get('image'):
                 image = next_up_meta['image']
             plot = next_up_meta.get('plot')
             aired = next_up_meta.get('aired')
+        else:
+            plot = aired = None
 
         info = {
-            'unique_ids': {'anilist_id': str(anilist_id)},
             'episode': next_up,
             'title': title,
             'tvshowtitle': res['title']['userPreferred'],
@@ -345,35 +299,21 @@ class AniListWLF(WatchlistFlavorBase):
 
         base = {
             "name": title,
-            "url": 'watchlist_to_ep/{0}/{1}/{2}/{3}'.format(anilist_id, mal_id, kitsu_id, progress),
+            "url": f"watchlist_to_ep/{anilist_id}/{mal_id}/{progress}",
             "image": image,
             "info": info,
             "fanart": image,
             "poster": poster
         }
 
-        show_meta = database.get_show_meta(anilist_id)
-        if show_meta:
-            art = pickle.loads(show_meta['art'])
-            if art.get('fanart'):
-                base['fanart'] = art['fanart']
-            if art.get('thumb'):
-                base['landscape'] = random.choice(art['thumb'])
-            if art.get('clearart'):
-                base['clearart'] = random.choice(art['clearart'])
-            if art.get('clearlogo'):
-                base['clearlogo'] = random.choice(art['clearlogo'])
-
         if res['format'] == 'MOVIE' and res['episodes'] == 1:
-            base['url'] = 'play_movie/{0}/{1}/{2}'.format(anilist_id, mal_id, kitsu_id)
+            base['url'] = f"play_movie/{anilist_id}/{mal_id}/"
             base['info']['mediatype'] = 'movie'
-            return self._parse_view(base, False)
-
+            return utils.parse_view(base, False, True)
         if next_up_meta:
-            base['url'] = url
-            return self._parse_view(base, False)
-
-        return self._parse_view(base)
+            base['url'] = f"play/{anilist_id}/{next_up}"
+            return utils.parse_view(base, False, True)
+        return utils.parse_view(base, True, False)
 
     def get_watchlist_anime_entry(self, anilist_id):
         query = '''
@@ -399,8 +339,8 @@ class AniListWLF(WatchlistFlavorBase):
             'mediaId': anilist_id
         }
 
-        r = self._post_request(self._URL, headers=self.__headers(), json={'query': query, 'variables': variables})
-        results = json.loads(r)['data']['Media']['mediaListEntry']
+        r = requests.post(self._URL, headers=self.__headers(), json={'query': query, 'variables': variables})
+        results = r.json()['data']['Media']['mediaListEntry']
         if not results:
             return {}
         anime_entry = {
@@ -408,16 +348,15 @@ class AniListWLF(WatchlistFlavorBase):
             'status': results['status'],
             'score': results['score']
         }
-
         return anime_entry
-    
+
     def save_completed(self):
+        import json
         data = self.get_user_anime_list('COMPLETED')
         completed = {}
         for dat in data:
             for entrie in dat['entries']:
-                if entrie['media']['episodes']:
-                    completed[str(entrie['media']['id'])] = int(entrie['media']['episodes'])
+                completed[str(entrie['media']['id'])] = int(entrie['media']['episodes'])
         with open(control.completed_json, 'w') as file:
             json.dump(completed, file)
 
@@ -448,8 +387,8 @@ class AniListWLF(WatchlistFlavorBase):
             'type': 'ANIME',
             'sort': self.__get_sort()
         }
-        r = self._post_request(self._URL, headers=self.__headers(), json={'query': query, 'variables': variables})
-        results = json.loads(r)
+        r = requests.post(self._URL, headers=self.__headers(), json={'query': query, 'variables': variables})
+        results = r.json()
         return results['data']['MediaListCollection']['lists']
 
     def get_watchlist_anime_info(self, anilist_id):
@@ -472,8 +411,8 @@ class AniListWLF(WatchlistFlavorBase):
             'mediaId': anilist_id
         }
 
-        r = self._post_request(self._URL, headers=self.__headers(), json={'query': query, 'variables': variables})
-        results = json.loads(r)
+        r = requests.post(self._URL, headers=self.__headers(), json={'query': query, 'variables': variables})
+        results = r.json()
         return results
 
     def update_list_status(self, anilist_id, status):
@@ -491,8 +430,8 @@ class AniListWLF(WatchlistFlavorBase):
             'status': status
         }
 
-        r = self._post_request(self._URL, headers=self.__headers(), json={'query': query, 'variables': variables})
-        return r != ''
+        r = requests.post(self._URL, headers=self.__headers(), json={'query': query, 'variables': variables})
+        return r.ok
 
     def update_num_episodes(self, anilist_id, episode):
         query = '''
@@ -510,8 +449,8 @@ class AniListWLF(WatchlistFlavorBase):
             'progress': int(episode)
         }
 
-        r = self._post_request(self._URL, headers=self.__headers(), json={'query': query, 'variables': variables})
-        return r != ''
+        r = requests.post(self._URL, headers=self.__headers(), json={'query': query, 'variables': variables})
+        return r.ok
 
     def update_score(self, anilist_id, score):
         query = '''
@@ -528,8 +467,8 @@ class AniListWLF(WatchlistFlavorBase):
             'score': float(score)
         }
 
-        r = self._post_request(self._URL, headers=self.__headers(), json={'query': query, 'variables': variables})
-        return r != ''
+        r = requests.post(self._URL, headers=self.__headers(), json={'query': query, 'variables': variables})
+        return r.ok
 
     def delete_anime(self, anilist_id):
         media_entry = self.get_watchlist_anime_info(anilist_id)['data']['Media']['mediaListEntry']
@@ -548,5 +487,5 @@ class AniListWLF(WatchlistFlavorBase):
         variables = {
             'id': int(list_id)
         }
-        r = self._post_request(self._URL, headers=self.__headers(), json={'query': query, 'variables': variables})
-        return r != ''
+        r = requests.post(self._URL, headers=self.__headers(), json={'query': query, 'variables': variables})
+        return r.ok

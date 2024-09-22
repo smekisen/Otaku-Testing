@@ -1,57 +1,39 @@
 import re
 import string
+import xbmc
+
 from resources.lib.ui import control
-from kodi_six import xbmc
 
-
-def strip_non_ascii_and_unprintable(text):
-    result = ''.join(char for char in text if char in string.printable)
-    return result.encode('ascii', errors='ignore').decode('ascii', errors='ignore')
+res = ['EQ', '480p', '720p', '1080p', '4k']
 
 
 def getAudio_lang(release_title):
-    lang = 0
     release_title = cleanTitle(release_title)
     if any(i in release_title for i in ['dual audio']):
         lang = 1
-    if any(i in release_title for i in ['dub', 'dubbed']):
+    elif any(i in release_title for i in ['dub', 'dubbed']):
         lang = 2
-
+    else:
+        lang = 0
     return lang
 
 
 def getQuality(release_title):
     release_title = release_title.lower()
-    quality = 'SD'
     if '4k' in release_title or '2160' in release_title:
-        quality = '4K'
-    if '1080' in release_title:
-        quality = '1080p'
-    if '720' in release_title:
-        quality = '720p'
-    if '480' in release_title:
-        quality = 'SD'
-
+        quality = 4
+    elif '1080' in release_title:
+        quality = 3
+    elif '720' in release_title:
+        quality = 2
+    else:
+        quality = 1
     return quality
 
 
 def getInfo(release_title):
     info = []
     release_title = cleanTitle(release_title)
-
-    prioritize_season_value = ''
-    prioritize_part_value = ''
-    prioritize_episode_value = ''
-
-    prioritize_dualaudio = False
-    prioritize_multiaudio = False
-    prioritize_multisubs = False
-    prioritize_batches = False
-    prioritize_season = False
-    prioritize_part = False
-    prioritize_episode = False
-    prioritize_consistently = False
-
     # info.video
     if any(i in release_title for i in ['x264', 'x 264', 'h264', 'h 264', 'avc']):
         info.append('AVC')
@@ -95,6 +77,8 @@ def getInfo(release_title):
         info.append('WMA')
     if any(i in release_title for i in ['dub', 'dubbed']):
         info.append('DUB')
+    if any(i in release_title for i in ['dual audio']):
+        info.append('DUAL-AUDIO')
 
     # info.channels
     if any(i in release_title for i in ['2 0 ', '2 0ch', '2ch']):
@@ -129,195 +113,88 @@ def getInfo(release_title):
         info.append('BLUR')
     if any(i in release_title for i in [' 3d']):
         info.append('3D')
-
-    if control.getSetting('general.sortsources') == '0':  # Torrents selected
-        prioritize_dualaudio = control.getSetting('general.prioritize_dualaudio') == 'true'
-        prioritize_multiaudio = control.getSetting('general.prioritize_multiaudio') == 'true'
-        prioritize_multisubs = control.getSetting('general.prioritize_multisubs') == 'true'
-        prioritize_batches = control.getSetting('general.prioritize_batches') == 'true'
-        prioritize_consistently = control.getSetting('consistent.torrentInspection') == 'true'
-
-        if prioritize_consistently:
-            prioritize_season = control.getSetting('consistent.prioritize_season') == 'true'
-            prioritize_part = control.getSetting('consistent.prioritize_part') == 'true'
-            prioritize_episode = control.getSetting('consistent.prioritize_episode') == 'true'
-        else:
-            prioritize_season = control.getSetting('general.prioritize_season') == 'true'
-            prioritize_part = control.getSetting('general.prioritize_part') == 'true'
-            prioritize_episode = control.getSetting('general.prioritize_episode') == 'true'
-
-        if not (prioritize_dualaudio or prioritize_multiaudio or prioritize_multisubs or prioritize_batches or prioritize_season or prioritize_part or prioritize_episode):
-            return info
-
-        from itertools import chain, combinations
-
-        # Define the order of the keys
-        key_order = ['SEASON', 'PART', 'EPISODE', 'DUAL-AUDIO', 'MULTI-AUDIO', 'MULTI-SUBS', 'BATCH']
-
-        # Define the user's selected priorities
-        selected_priorities = [prioritize_season, prioritize_part, prioritize_episode, prioritize_dualaudio, prioritize_multiaudio, prioritize_multisubs, prioritize_batches]
-
-        # Generate all possible combinations of the selected priorities
-        selected_combinations = list(
-            chain(
-                *map(
-                    lambda x: combinations([key for key, selected in zip(key_order, selected_priorities) if selected], x),
-                    range(0, len(selected_priorities) + 1)
-                )
-            )
-        )
-
-        # Initialize keyword as an empty list
-        keyword = []
-
-        for combination in selected_combinations:
-            # Skip the empty combination
-            if not combination:
-                continue
-
-            # Join the keys in the combination with '_OR_' and append to the keyword list
-            keyword.append('_OR_'.join(combination))
-
-        # Keep only the last combination in the keyword list
-        keyword = [keyword[-1]] if keyword else []
-
-        # Convert the keyword list to a string
-        keyword = ' '.join(keyword) if keyword else ''
-
-        if prioritize_consistently:
-            prioritize_season_value = control.getSetting('consistent.prioritize_season_value')
-            prioritize_part_value = control.getSetting('consistent.prioritize_part_value')
-            prioritize_episode_value = control.getSetting('consistent.prioritize_episode_value')
-        else:
-            prioritize_season_value = control.getSetting('menu.prioritize_season_value')
-            prioritize_part_value = control.getSetting('menu.prioritize_part_value')
-            prioritize_episode_value = control.getSetting('menu.prioritize_episode_value')
-
-        # Check if '_OR_' is in the keyword
-        if '_OR_' in keyword:
-            # Split the keyword into individual terms
-            terms = keyword.split('_OR_')
-            # Define the formats for each term
-            term_formats = {
-                'SEASON': ['season {}'.format(prioritize_season_value), 'season 0{}'.format(prioritize_season_value), 's{}'.format(prioritize_season_value), 's0{}'.format(prioritize_season_value)],
-                'PART': ['part {}'.format(prioritize_part_value), 'part 0{}'.format(prioritize_part_value), 'cour {}'.format(prioritize_part_value), 'cour 0{}'.format(prioritize_part_value), 'part{}'.format(prioritize_part_value), 'part0{}'.format(prioritize_part_value), 'cour{}'.format(prioritize_part_value), 'cour0{}'.format(prioritize_part_value)],
-                'EPISODE': ['episode {}'.format(prioritize_episode_value), 'episode 0{}'.format(prioritize_episode_value), 'ep {}'.format(prioritize_episode_value), 'ep 0{}'.format(prioritize_episode_value), 'episode{}'.format(prioritize_episode_value), 'episode0{}'.format(prioritize_episode_value), 'ep{}'.format(prioritize_episode_value), 'ep0{}'.format(prioritize_episode_value), 'e{}'.format(prioritize_episode_value), 'e0{}'.format(prioritize_episode_value)],
-                'DUAL-AUDIO': ['dual-audio', 'dual audio'],
-                'MULTI-AUDIO': ['multi-audio', 'multi audio', 'multiple audio'],
-                'MULTI-SUBS': ['multi-sub', 'multi sub', 'multiple subtitle'],
-                'BATCH': ['batch']
-            }
-            # Define the variables for each term
-            term_variables = {
-                'SEASON': str(prioritize_season_value),
-                'PART': str(prioritize_part_value),
-                'EPISODE': str(prioritize_episode_value)
-            }
-
-            # Create a new dictionary that only contains the keys that are in terms
-            filtered_term_formats = {term: term_formats[term] for term in terms if term in term_formats}
-
-            # Flatten the dictionary into a list
-            flat_filtered_term_formats = [format_string for format_strings in filtered_term_formats.values() for format_string in format_strings]
-
-            # Create a new list that only contains the values of the keys that are in terms
-            filtered_term_variables_values = [term_variables[term] for term in terms if term in term_variables]
-
-            # Join the list into a single string with a comma as a separator
-            filtered_term_variables_string = ','.join(filtered_term_variables_values)
-
-            # Check if all terms exist in the release_title and append the keyword to info
-            if sum(i.format(filtered_term_variables_string) in release_title for i in flat_filtered_term_formats) >= len(terms):
-                info.append(keyword)
-
-        else:
-            if keyword is None:
-                pass
-            else:
-                # Define the keyword as the only term
-                term = keyword
-                # Define the formats for each term
-                term_formats = {
-                    'SEASON': ['season {}'.format(prioritize_season_value), 'season 0{}'.format(prioritize_season_value), 's{}'.format(prioritize_season_value), 's0{}'.format(prioritize_season_value)],
-                    'PART': ['part {}'.format(prioritize_part_value), 'part 0{}'.format(prioritize_part_value), 'cour {}'.format(prioritize_part_value), 'cour 0{}'.format(prioritize_part_value), 'part{}'.format(prioritize_part_value), 'part0{}'.format(prioritize_part_value), 'cour{}'.format(prioritize_part_value), 'cour0{}'.format(prioritize_part_value)],
-                    'EPISODE': ['episode {}'.format(prioritize_episode_value), 'episode 0{}'.format(prioritize_episode_value), 'ep {}'.format(prioritize_episode_value), 'ep 0{}'.format(prioritize_episode_value), 'episode{}'.format(prioritize_episode_value), 'episode0{}'.format(prioritize_episode_value), 'ep{}'.format(prioritize_episode_value), 'ep0{}'.format(prioritize_episode_value), 'e{}'.format(prioritize_episode_value), 'e0{}'.format(prioritize_episode_value)],
-                    'DUAL-AUDIO': ['dual audio'],
-                    'MULTI-AUDIO': ['multi-audio', 'multi audio', 'multiple audio'],
-                    'MULTI-SUBS': ['multi-sub', 'multi sub', 'multiple subtitle'],
-                    'BATCH': ['batch']
-                }
-                # Define the variables for each term
-                term_variables = {
-                    'SEASON': str(prioritize_season_value),
-                    'PART': str(prioritize_part_value),
-                    'EPISODE': str(prioritize_episode_value),
-                }
-
-                # Create a new dictionary that only contains the keys that are in term
-                filtered_term_formats = term_formats[term]
-
-                if keyword == 'SEASON' or keyword == 'PART' or keyword == 'EPISODE':
-                    # Create a new list that only contains the values of the keys that are in term
-                    filtered_term_variables_values = term_variables[term]
-
-                    # Join the list into a single string with a comma as a separator
-                    filtered_term_variables_string = ','.join(filtered_term_variables_values)
-
-                    # Check if any term exist in the release_title and append the keyword to info
-                    if any(i.format(filtered_term_variables_string) in release_title for i in filtered_term_formats):
-                        info.append(keyword)
-
-                else:
-                    if any(i in release_title for i in filtered_term_formats):
-                        info.append(keyword)
-
     return info
 
 
 def get_cache_check_reg(episode):
-    try:
-        playList = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
-        info = playList[playList.getposition()].getVideoInfoTag()
-        season = str(info.getSeason()).zfill(2)
-    except:
-        season = ''
-
+    # playList = control.playList
+    # playList_position = playList.getposition()
+    # if playList_position != -1:
+    #     info = playList[playList_position].getVideoInfoTag()
+    #     season = str(info.getSeason()).zfill(2)
+    # else:
+    #     season = ''
+    season = ''
+    # if control.getSetting('regex.question') == 'true':
+    #     reg_string = r'''(?ix)                              # Ignore case (i), and use verbose regex (x)
+    #                  (?:                                    # non-grouping pattern
+    #                    s|season                             # s or season
+    #                    )?
+    #                  ({})?                                  # season num format
+    #                  (?:                                    # non-grouping pattern
+    #                    e|x|episode|ep|ep\.|_|-|\(           # e or x or episode or start of a line
+    #                    )?                                   # end non-grouping pattern
+    #                  \s*                                    # 0-or-more whitespaces
+    #                  (?<![\d])
+    #                  ({}|{})                                # episode num format: xx or xxx
+    #                  (?![\d])
+    #                  '''.format(season, episode.zfill(2), episode.zfill(3))
+    # else:
     reg_string = r'''(?ix)                              # Ignore case (i), and use verbose regex (x)
                  (?:                                    # non-grouping pattern
                    s|season                             # s or season
                    )?
-                 ({})?                                  #season num format
+                 ({})?                                  # season num format
                  (?:                                    # non-grouping pattern
-                   e|x|episode|ep|ep\.|_|-|\(              # e or x or episode or start of a line
+                   e|x|episode|ep|ep\.|_|-|\(           # e or x or episode or start of a line
                    )                                    # end non-grouping pattern
                  \s*                                    # 0-or-more whitespaces
                  (?<![\d])
                  ({}|{})                                # episode num format: xx or xxx
                  (?![\d])
                  '''.format(season, episode.zfill(2), episode.zfill(3))
-
     return re.compile(reg_string)
+
+
+def convert_to_bytes(size, units):
+    unit = units.upper()
+    if unit == 'KB':
+        byte_size = size * 2**10
+    elif unit == 'MB':
+        byte_size = size * 2**20
+    elif unit == 'GB':
+        byte_size = size * 2**30
+    elif unit == 'TB':
+        byte_size = size * 2**40
+    else:
+        raise ValueError("Unit must be 'KB', 'MB', 'GB', 'TB' ")
+    return byte_size
+
+
+def get_size(size=0):
+    power = 1024.0
+    n = 0
+    power_labels = {0: 'B', 1: 'KB', 2: 'MB', 3: 'GB'}
+    while size > power:
+        size /= power
+        n += 1
+    return '{0:.2f} {1}'.format(size, power_labels[n])
 
 
 def get_best_match(dict_key, dictionary_list, episode, pack_select=False):
     regex = get_cache_check_reg(episode)
-
     files = []
     for i in dictionary_list:
-        path = re.sub(r'\[.*?\]', '', i[dict_key].split('/')[-1])
+        path = re.sub(r'\[.*?]', '', i[dict_key].split('/')[-1])
         i['regex_matches'] = regex.findall(path)
         files.append(i)
-
-    if control.getSetting('general.manual.select') == 'true' or pack_select:
+    if pack_select:
         files = user_select(files, dict_key)
     else:
         files = [i for i in files if len(i['regex_matches']) > 0]
-
         if len(files) == 0:
-            return None
-
+            return
         files = sorted(files, key=lambda x: len(' '.join(list(x['regex_matches'][0]))), reverse=True)
-
         if len(files) != 1:
             files = user_select(files, dict_key)
 
@@ -325,80 +202,28 @@ def get_best_match(dict_key, dictionary_list, episode, pack_select=False):
 
 
 def cleanTitle(title):
-    title = clean_title(title)
-    return title
-
-
-def clean_title(title, broken=None):
     title = title.lower()
-    # title = control.deaccentString(title)
-    title = strip_non_ascii_and_unprintable(title)
-
-    if broken == 1:
-        apostrophe_replacement = ''
-    elif broken == 2:
-        apostrophe_replacement = ' s'
-    else:
-        apostrophe_replacement = 's'
+    result = ''.join(char for char in title if char in string.printable)
+    title = result.encode('ascii', errors='ignore').decode('ascii', errors='ignore')
+    apostrophe_replacement = 's'
     title = title.replace("\\'s", apostrophe_replacement)
     title = title.replace("'s", apostrophe_replacement)
     title = title.replace("&#039;s", apostrophe_replacement)
     title = title.replace(" 039 s", apostrophe_replacement)
-
-    title = re.sub(r'\:|\\|\/|\,|\!|\?|\(|\)|\'|\"|\\|\[|\]|\-|\_|\.', ' ', title)
+    title = re.sub(r'[:/,!?()\'"\\\[\]\-_.]', ' ', title)
     title = re.sub(r'\s+', ' ', title)
-    title = re.sub(r'\&', 'and', title)
-
+    title = re.sub(r'&', 'and', title)
     return title.strip()
 
 
 def is_file_ext_valid(file_name):
-    try:
-        COMMON_VIDEO_EXTENSIONS = xbmc.getSupportedMedia('video').split('|')
-
-        COMMON_VIDEO_EXTENSIONS = [i for i in COMMON_VIDEO_EXTENSIONS if i != '' and i != '.zip']
-    except:
-        pass
-
-    if '.' + file_name.split('.')[-1] not in COMMON_VIDEO_EXTENSIONS:
-        return False
-
-    return True
+    return False if '.' + file_name.split('.')[-1] not in video_ext() else True
 
 
-def filter_single_episode(episode, release_title):
-    filename = re.sub(r'\[.*?\]', '', release_title)
-    filename = filename.lower()
-
-    try:
-        playList = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
-        info = playList[playList.getposition()].getVideoInfoTag()
-        season = str(info.getSeason()).zfill(2)
-        season = 's' + season
-    except:
-        season = ''
-
-    filter_episode = [
-        '%se%s' % (season, episode.zfill(3)),
-        '%se%s' % (season, episode.zfill(2)),
-        episode.zfill(3),
-        episode.zfill(2)
-    ]
-
-    if next((string for string in filter_episode if string in filename), False):
-        return True
-
-    return False
-
-# def run_once(f):
-#     def wrapper(*args, **kwargs):
-#         if not wrapper.has_run:
-#             wrapper.has_run = True
-#             return f(*args, **kwargs)
-#     wrapper.has_run = False
-#     return wrapper
-
-# @run_once
+def video_ext():
+    COMMON_VIDEO_EXTENSIONS = xbmc.getSupportedMedia('video').split('|')
+    COMMON_VIDEO_EXTENSIONS = [i for i in COMMON_VIDEO_EXTENSIONS if i != '' and i != '.zip']
+    return COMMON_VIDEO_EXTENSIONS
 
 
 def user_select(files, dict_key):
@@ -408,8 +233,3 @@ def user_select(files, dict_key):
     else:
         file = [files[idx]]
     return file
-
-
-def get_embedhost(url):
-    s = re.search(r'(?://|\.)([^\.]+)\.', url)
-    return s.group(1)

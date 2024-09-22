@@ -1,49 +1,41 @@
 import itertools
-import json
 import pickle
 import re
-from functools import partial
+import requests
 
+from functools import partial
 from bs4 import BeautifulSoup, SoupStrainer
-from six.moves import urllib_parse
-from resources.lib.ui import control, database, client
+from urllib import parse
+from resources.lib.ui import database
 from resources.lib.ui.BrowserBase import BrowserBase
 
 
-class sources(BrowserBase):
-    _BASE_URL = 'https://animixplay.fun/' if control.getSetting('provider.animixalt') == 'true' else 'https://animixplay.best/'
+class Sources(BrowserBase):
+    _BASE_URL = 'https://animixplay.best/'
 
-    def get_sources(self, anilist_id, episode, get_backup):
+    def get_sources(self, anilist_id, episode):
         show = database.get_show(anilist_id)
-        kodi_meta = pickle.loads(show.get('kodi_meta'))
-        # title = kodi_meta.get('ename') or kodi_meta.get('name')
-        title = kodi_meta.get('name')
+        kodi_meta = pickle.loads(show['kodi_meta'])
+        title = kodi_meta['ename'] or kodi_meta['name']
         title = self._clean_title(title)
 
-        headers = {'Origin': self._BASE_URL[:-1],
-                   'Referer': self._BASE_URL}
-        r = database.get(
-            client.request,
-            8,
-            self._BASE_URL + 'api/lsearch',
-            XHR=True,
-            post={'qfast': title},
-            headers=headers
-        )
-
-        soup = BeautifulSoup(json.loads(r).get('result'), 'html.parser')
-        items = soup.find_all('a')
+        headers = {
+            'Origin': self._BASE_URL[:-1],
+            'Referer': self._BASE_URL
+        }
+        r = requests.get(f"{self._BASE_URL}search", headers=headers, params={'keyword': title}).text
+        soup = BeautifulSoup(r, 'html.parser')
+        items = soup.find_all('div', {'class': re.compile('^post')})
         slugs = []
-
         for item in items:
-            ititle = item.find('p', {'class': 'name'})
+            ititle = item.find('h5')
             if ititle:
                 ititle = ititle.text.strip()
                 if (ititle.lower() + '  ').startswith(title.lower() + '  '):
-                    slugs.append(item.get('href'))
+                    slugs.append(item.find('a').get('href'))
         if not slugs:
             if len(items) > 1:
-                slugs = [items[0].get('href')]
+                slugs = [items[0].find('a').get('href')]
         all_results = []
         if slugs:
             slugs = list(slugs.keys()) if isinstance(slugs, dict) else slugs
@@ -54,32 +46,29 @@ class sources(BrowserBase):
 
     def _process_animixplay(self, slug, title, episode):
         sources = []
-        r = database.get(client.request, 8, slug, referer=self._BASE_URL)
+        r = requests.get(slug, headers={'Referer': self._BASE_URL}).text
         eurl = re.search(r'id="showstreambtn"\s*href="([^"]+)', r)
         if eurl:
             eurl = eurl.group(1)
-            resp = database.get(client.request, 8, eurl, referer=self._BASE_URL, output='extended')
-            s = resp[0]
-            cookie = resp[4]
-            referer = urllib_parse.urljoin(eurl, '/')
+            resp = requests.get(eurl, headers={'Referer': self._BASE_URL})
+            s = resp.text
+            cookie = resp.cookies
+            referer = parse.urljoin(eurl, '/')
             if episode:
                 esurl = re.findall(r'src="(/ajax/stats.js[^"]+)', s)[0]
-                esurl = urllib_parse.urljoin(eurl, esurl)
-                epage = database.get(client.request, 8, esurl, referer=eurl)
+                esurl = parse.urljoin(eurl, esurl)
+                epage = requests.get(esurl, headers={'Referer': eurl}).text
                 soup = BeautifulSoup(epage, "html.parser")
                 epurls = soup.find_all('a', {'class': 'playbutton'})
                 ep_not_found = True
                 for epurl in epurls:
-                    try:
-                        if int(epurl.text) == int(episode):
-                            ep_not_found = False
-                            epi_url = epurl.get('href')
-                            resp = database.get(client.request, 8, epi_url, referer=eurl, output='extended')
-                            cookie = resp[4]
-                            s = resp[0]
-                            break
-                    except:
-                        continue
+                    if int(epurl.text) == int(episode):
+                        ep_not_found = False
+                        epi_url = epurl.get('href')
+                        resp = requests.get(epi_url, headers={'Referer': eurl})
+                        cookie = resp.cookies
+                        s = resp.text
+                        break
                 if ep_not_found:
                     return sources
 
@@ -92,16 +81,16 @@ class sources(BrowserBase):
             mdiv = BeautifulSoup(s, "html.parser", parse_only=mlink)
             mitems = mdiv.find_all('li')
             for mitem in mitems:
-                if any(x in mitem.text.lower() for x in control.enabled_embeds()):
+                if any(x in mitem.text.lower() for x in self.embeds()):
                     type_ = 'direct'
                     server = mitem.a.get('data-name')
                     qual = mitem.a.get('title')
                     if '1080p' in qual:
-                        qual = '1080p'
+                        qual = 3
                     elif 'HD' in qual:
-                        qual = '720p'
+                        qual = 2
                     else:
-                        qual = 'SD'
+                        qual = 0
                     lang = 2 if mitem.a.get('id').endswith('dub') else 0
 
                     data = {
@@ -113,20 +102,14 @@ class sources(BrowserBase):
                     }
                     headers = {
                         'Origin': referer[:-1],
-                        'X-CSRF-TOKEN': csrf_token
+                        'X-CSRF-TOKEN': csrf_token,
+                        'Referer': eurl
                     }
-                    r = client.request(
-                        urllib_parse.urljoin(eurl, '/ajax/embed'),
-                        post=data,
-                        headers=headers,
-                        XHR=True,
-                        referer=eurl,
-                        cookie=cookie
-                    )
-                    embed_url = urllib_parse.urljoin(eurl, re.findall(r'<iframe.+?src="([^"]+)', r)[0])
+                    r = requests.post(f"{eurl}ajax/embed", headers=headers, data=data, cookies=cookie).text
+                    embed_url = parse.urljoin(eurl, re.findall(r'<iframe.+?src="([^"]+)', r)[0])
                     subs = ''
                     slink = ''
-                    s = client.request(embed_url, referer=eurl)
+                    s = requests.get(embed_url, headers={'Referer': eurl}).text
                     sdiv = re.search(r'<source.+?src="([^"]+)', s)
                     if sdiv:
                         slink = sdiv.group(1)
@@ -147,13 +130,12 @@ class sources(BrowserBase):
                             'debrid_provider': '',
                             'provider': 'animix',
                             'size': 'NA',
+                            'byte_size': 0,
                             'info': [server, 'DUB' if lang == 2 else 'SUB'],
                             'lang': lang
                         }
 
                         if subs:
-                            source.update({'subs': [{'url': subs, 'lang': 'English'}]})
-
+                            source['subs'] = [{'url': subs, 'lang': 'English'}]
                         sources.append(source)
-
         return sources

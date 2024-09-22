@@ -1,10 +1,10 @@
-import json
-import itertools
-import pickle
 import time
+import requests
+import pickle
 
-from resources.lib.ui import control, database
+from resources.lib.ui import utils, database, control
 from resources.lib.WatchlistFlavor.WatchlistFlavorBase import WatchlistFlavorBase
+from resources.lib.ui.divide_flavors import div_flavor
 
 
 class SimklWLF(WatchlistFlavorBase):
@@ -13,11 +13,14 @@ class SimklWLF(WatchlistFlavorBase):
     _NAME = 'simkl'
     _IMAGE = "simkl.png"
 
-    client_id = '59dfdc579d244e1edf6f89874d521d37a69a95a1abd349910cb056a1872ba2c8'
+    # client_id = '5178a709b7942f1f5077b737b752eea0f6dee684d0e044fa5acee8822a0cbe9b'    # Swag
+    # client_id = "503b6b37476926a7a17ac86b95a81b245879955a7531e3e7d8913c0624796ea0"    # JZ
+    client_id = "59dfdc579d244e1edf6f89874d521d37a69a95a1abd349910cb056a1872ba2c8"      # Otaku
 
     def __headers(self):
         headers = {
-            "Authorization": 'Bearer {0}'.format(self._token),
+            "Content-Type": "application/json",
+            "Authorization": f'Bearer {self._token}',
             "simkl-api-key": self.client_id
         }
         return headers
@@ -27,81 +30,73 @@ class SimklWLF(WatchlistFlavorBase):
             'client_id': self.client_id,
         }
 
-        r = self._get_request(self._URL + '/oauth/pin', params=params)
-        device_code = json.loads(r)
+        r = requests.get(f'{self._URL}/oauth/pin', params=params)
+        device_code = r.json()
 
         control.copy2clip(device_code["user_code"])
         control.progressDialog.create('SIMKL Auth')
-        control.progressDialog.update(
-            100,
-            control.lang(30100).format(control.colorString('https://simkl.com/pin')) + '[CR]'
-            + control.lang(30101).format(control.colorString(device_code['user_code'])) + '[CR]'
-            + control.lang(30102)
-        )
+        f_string = f'''
+{control.lang(30020).format(control.colorstr('https://simkl.com/pin'))}
+{control.lang(30021).format(control.colorstr(device_code['user_code']))}
+{control.lang(30022)}
+'''
+        control.progressDialog.update(100, f_string)
         inter = int(device_code['expires_in'] / device_code['interval'])
         for i in range(inter):
             if control.progressDialog.iscanceled():
                 control.progressDialog.close()
                 return
-            r = self._get_request('{0}/oauth/pin/{1}'.format(self._URL, device_code["user_code"]), params=params)
-            r = json.loads(r)
+            r = requests.get(f'{self._URL}/oauth/pin/{device_code["user_code"]}', params=params)
+            r = r.json()
             if r['result'] == 'OK':
                 self._token = r['access_token']
                 login_data = {
                     'token': self._token
                 }
-                r = self._post_request(self._URL + '/users/settings', headers=self.__headers())
-                if r:
-                    user = json.loads(r)['user']
+                r = requests.post(f'{self._URL}/users/settings', headers=self.__headers())
+                if r.ok:
+                    user = r.json()['user']
                     login_data['username'] = user['name']
                 return login_data
-            control.progressDialog.update(
-                int((inter - i) / inter * 100),
-                control.lang(30100).format(control.colorString('https://simkl.com/pin')) + '[CR]'
-                + control.lang(30101).format(control.colorString(device_code['user_code'])) + '[CR]'
-                + control.lang(30102) + '[CR]'
-                + 'Code Valid for {0} Seconds'.format(control.colorString(device_code["expires_in"] - i * device_code["interval"]))
-            )
+            f_string = f'''
+{control.lang(30020).format(control.colorstr('https://simkl.com/pin'))}
+{control.lang(30021).format(control.colorstr(device_code['user_code']))}
+{control.lang(30022)}
+Code Valid for {control.colorstr(device_code["expires_in"] - i * device_code["interval"])} Seconds
+'''
+            control.progressDialog.update(int((inter - i) / inter * 100), f_string)
             time.sleep(device_code['interval'])
-
-    def _handle_paging(self, hasNextPage, base_url, page):
-        if not hasNextPage or (not control.is_addon_visible() and control.getSetting('widget.hide.next') == 'true'):
-            return []
-        next_page = page + 1
-        name = "Next Page (%d)" % next_page
-        offset = ''
-        return self._parse_view({'name': name, 'url': '{0}/{1}/{2}'.format(base_url, offset, next_page), 'image': 'next.png', 'info': {}, 'fanart': 'next.png'})
 
     def __get_sort(self):
         sort_types = {
             "Anime Title": "anime_title",
             "Last Updated": "list_updated_at",
-            "Last Added": "last_added",
+            'Last Added': "last_added",
             "User Rating": "user_rating"
         }
         return sort_types[self._sort]
 
     def watchlist(self):
         statuses = [
-            ("Next Up", "watching?next_up=true"),
-            ("Currently Watching", "watching"),
-            ("Completed", "completed"),
-            ("On Hold", "hold"),
-            ("Dropped", "dropped"),
-            ("Plan to Watch", "plantowatch"),
-            ("All Anime", "ALL")
+            ("Next Up", "watching?next_up=true", 'nextup.png'),
+            ("Currently Watching", "watching", 'watching.png'),
+            ("Completed", "completed", 'completed.png'),
+            ("On Hold", "hold", 'onhold.png'),
+            # ("Dropped", "notinteresting"),
+            ("Dropped", "dropped", 'dropped.png'),
+            ("Plan to Watch", "plantowatch", 'plantowatch.png'),
+            ("All Anime", "ALL", 'allanime.png')
         ]
-        all_results = map(self._base_watchlist_view, statuses)
-        all_results = list(itertools.chain(*all_results))
-        return all_results
+        return [utils.allocate_item(res[0], f'watchlist_status_type/{self._NAME}/{res[1]}', True, False, res[2]) for res in statuses]
 
     @staticmethod
     def action_statuses():
         actions = [
-            ("Add to Currently Watching", "watching"),
+            ("Add to On Currently Watching", "watching"),
             ("Add to Completed", "completed"),
             ("Add to On Hold", "hold"),
             ("Add to Dropped", "dropped"),
+            # ("Add to Dropped", "notinteresting"),
             ("Add to Plan to Watch", "plantowatch"),
             ("Set Score", "set_score"),
             ("Delete", "DELETE")
@@ -109,54 +104,46 @@ class SimklWLF(WatchlistFlavorBase):
         return actions
 
     def _base_watchlist_view(self, res):
-        base = {
-            "name": res[0],
-            "url": 'watchlist_status_type/%s/%s' % (self._NAME, res[1]),
-            "image": '%s.png' % res[0].lower(),
-            "info": {}
-        }
-        return self._parse_view(base)
+        url = f'watchlist_status_type/{self._NAME}/{res[1]}'
+        return [utils.allocate_item(res[0], url, True, False, f'{res[0].lower()}.png')]
 
     def get_watchlist_status(self, status, next_up, offset=0, page=1):
         results = self.get_all_items(status)
         if not results:
             return []
-        if next_up:
-            all_results = filter(lambda x: True if x else False, map(self._base_next_up_view, results['anime']))
-        else:
-            all_results = map(self._base_watchlist_status_view, results['anime'])
 
-        all_results = list(itertools.chain(*all_results))
+        if next_up:
+            all_results = list(filter(lambda x: True if x else False, map(self._base_next_up_view, results['anime'])))
+        else:
+            all_results = list(map(self._base_watchlist_status_view, results['anime']))
+
         sort_pref = self.__get_sort()
 
-        if sort_pref == 'anime_title':
+        if sort_pref == '2':  # anime_title
             all_results = sorted(all_results, key=lambda x: x['info']['title'])
-        elif sort_pref == 'list_updated_at':
+        elif sort_pref == '0':    # list_updated_at
             all_results = sorted(all_results, key=lambda x: x['info']['last_watched'] or "0", reverse=True)
-        elif sort_pref == 'user_rating':
+        elif sort_pref == '3':    # user_rating
             all_results = sorted(all_results, key=lambda x: x['info']['user_rating'] or 0, reverse=True)
-        elif sort_pref == 'last_added':  # new sort option
-            all_results.reverse()  # reverse the list to get it in descending order
-
-        # all_results += self._handle_paging(results['paging'].get('next'), base_plugin_url, page)
+        elif sort_pref == '1': # last_added
+            all_results.reverse()
         return all_results
 
-    def _base_watchlist_status_view(self, res):
+    @div_flavor
+    def _base_watchlist_status_view(self, res, mal_dub=None, dubsub_filter=None):
         show_ids = res['show']['ids']
 
         mal_id = show_ids.get('mal', '')
         anilist_id = show_ids.get('anilist', '')
-        kitsu_id = show_ids.get('kitsu', '')
 
+        dub = True if mal_dub and mal_dub.get(str(mal_id)) else False
         show = database.get_show(anilist_id)
-        if show:
-            kodi_meta = pickle.loads(show['kodi_meta'])
-        else:
-            kodi_meta = {}
+        kodi_meta = pickle.loads(show['kodi_meta']) if show else {}
 
-        title = res['show']['title']
         if self._title_lang == 'english':
-            title = kodi_meta.get('ename') or kodi_meta.get('title_userPreferred') or title
+            title = kodi_meta.get('ename') or res['show']['title']
+        else:
+            title = res['show']['title']
 
         info = {
             'title': title,
@@ -171,50 +158,49 @@ class SimklWLF(WatchlistFlavorBase):
 
         base = {
             "name": '%s - %d/%d' % (title, res["watched_episodes_count"], res["total_episodes_count"]),
-            "url": 'watchlist_to_ep/{0}/{1}/{2}/{3}'.format(anilist_id, mal_id, kitsu_id, res["watched_episodes_count"]),
-            "image": 'https://wsrv.nl/?url=https://simkl.in/posters/{0}_m.jpg'.format(res["show"]["poster"]),
+            "url": f'watchlist_to_ep/{anilist_id}/{mal_id}/{res["watched_episodes_count"]}',
+            "image": f'https://wsrv.nl/?url=https://simkl.in/posters/{res["show"]["poster"]}_m.jpg',
             "info": info
         }
 
         if res["total_episodes_count"] == 1:
-            base['url'] = 'play_movie/{0}/{1}/{2}'.format(anilist_id, mal_id, kitsu_id)
+            base['url'] = f'play_movie/{anilist_id}/{mal_id}/'
             base['info']['mediatype'] = 'movie'
-            return self._parse_view(base, False)
-        return self._parse_view(base)
+            return utils.parse_view(base, False, True, dub=dub, dubsub_filter=dubsub_filter)
+        return utils.parse_view(base, True, False, dub=dub, dubsub_filter=dubsub_filter)
 
     def _base_next_up_view(self, res):
         show_ids = res['show']['ids']
 
         mal_id = show_ids.get('mal', '')
         # anilist_id = show_ids.get('anilist', '')
-        kitsu_id = show_ids.get('kitsu', '')
 
         progress = res['watched_episodes_count']
         next_up = progress + 1
         episode_count = res["total_episodes_count"]
 
         if 0 < episode_count < next_up:
-            return None
+            return
 
         base_title = res['show']['title']
 
         title = '%s - %s/%s' % (base_title, next_up, episode_count)
-        poster = image = 'https://wsrv.nl/?url=https://simkl.in/posters/{0}_m.jpg'.format(res["show"]["poster"])
-        plot = aired = None
+        poster = image = f'https://wsrv.nl/?url=https://simkl.in/posters/{res["show"]["poster"]}_m.jpg'
         anilist_id, next_up_meta, show = self._get_next_up_meta(mal_id, int(progress))
         if next_up_meta:
             kodi_meta = pickle.loads(show['kodi_meta'])
             if self._title_lang == 'english':
-                base_title = kodi_meta['ename'] or kodi_meta['title_userPreferred']
+                base_title = kodi_meta['english']
                 title = '%s - %s/%s' % (base_title, next_up, episode_count)
-
-            url = 'play/%d/%d/' % (anilist_id, next_up)
             if next_up_meta.get('title'):
                 title = '%s - %s' % (title, next_up_meta['title'])
             if next_up_meta.get('image'):
                 image = next_up_meta['image']
             plot = next_up_meta.get('plot')
             aired = next_up_meta.get('aired')
+        else:
+            plot = aired = None
+
         info = {
             'episode': next_up,
             'title': title,
@@ -228,7 +214,7 @@ class SimklWLF(WatchlistFlavorBase):
 
         base = {
             "name": title,
-            "url": 'watchlist_to_ep/{0}/{1}/{2}/{3}'.format(anilist_id, mal_id, kitsu_id, res["watched_episodes_count"]),
+            "url": f'watchlist_to_ep/{anilist_id}/{mal_id}/{res["watched_episodes_count"]}',
             "image": image,
             "info": info,
             "fanart": image,
@@ -236,32 +222,40 @@ class SimklWLF(WatchlistFlavorBase):
         }
 
         if res["total_episodes_count"] == 1:
-            base['url'] = 'play_movie/{0}/{1}/{2}'.format(anilist_id, mal_id, kitsu_id)
+            base['url'] = f'play_movie/{anilist_id}/{mal_id}/'
             base['info']['mediatype'] = 'movie'
-            return self._parse_view(base, False)
+            return utils.parse_view(base, False, True)
 
         if next_up_meta:
-            base['url'] = url
-            return self._parse_view(base, False)
+            base['url'] = 'play/%d/%d' % (anilist_id, next_up)
+            return utils.parse_view(base, False, True)
 
-        return self._parse_view(base)
+        return utils.parse_view(base, True, False)
 
     @staticmethod
     def get_watchlist_anime_entry(anilist_id):
-        return {}
-        # anime_entry = {
-        #     'eps_watched': item_dict['progress'],
-        #     'status': item_dict['status'],
-        #     'score': item_dict['ratingTwenty']
+        # mal_id = self._get_mapping_id(anilist_id, 'mal_id')
+        # if not mal_id:
+        #     return
+        #
+        # params = {
+        #     'mal': mal_id
         # }
-        # return anime_entry
+        # r = requests.post(f'{self._URL}/sync/watched', headers=self.__headers(), params=params)
+        # result = r.json()
+        # anime_entry = {
+        #     'eps_watched': results['num_episodes_watched'],
+        #     'status': results['status'],
+        #     'score': results['score']
+        # }
+        return {}
 
-    def save_completed(self):    
+    def save_completed(self):
+        import json
         data = self.get_all_items('completed')
         completed = {}
         for dat in data['anime']:
-            if 'anilist' in dat['show']['ids']:
-                completed[str(dat['show']['ids']['anilist'])] = dat['total_episodes_count']
+            completed[str(dat['show']['ids']['anilist'])] = dat['total_episodes_count']
         with open(control.completed_json, 'w') as file:
             json.dump(completed, file)
 
@@ -271,9 +265,8 @@ class SimklWLF(WatchlistFlavorBase):
             'extended': 'full',
             # 'next_watch_info': 'yes'
         }
-        r = self._get_request('{0}/sync/all-items/anime/{1}'.format(self._URL, status), headers=self.__headers(), params=params)
-        r = json.loads(r)
-        return r
+        r = requests.get(f'{self._URL}/sync/all-items/anime/{status}', headers=self.__headers(), params=params)
+        return r.json()
 
     def update_list_status(self, anilist_id, status):
         data = {
@@ -284,9 +277,9 @@ class SimklWLF(WatchlistFlavorBase):
                 }
             }]
         }
-        r = self._post_request(self._URL + '/sync/add-to-list', headers=self.__headers(), json=data)
-        if r:
-            r = json.loads(r)
+        r = requests.post(f'{self._URL}/sync/add-to-list', headers=self.__headers(), json=data)
+        if r.ok:
+            r = r.json()
             if not r['not_found']['shows'] or not r['not_found']['shows']:
                 if status == 'completed' and r.get('added', {}).get('shows', [{}])[0].get('to') == 'watching':
                     return 'watching'
@@ -302,9 +295,9 @@ class SimklWLF(WatchlistFlavorBase):
                 "episodes": [{'number': i} for i in range(1, int(episode) + 1)]
             }]
         }
-        r = self._post_request(self._URL + '/sync/history', headers=self.__headers(), json=data)
-        if r:
-            r = json.loads(r)
+        r = requests.post(f'{self._URL}/sync/history', headers=self.__headers(), json=data)
+        if r.ok:
+            r = r.json()
             if not r['not_found']['shows'] or not r['not_found']['movies']:
                 return True
         return False
@@ -318,13 +311,13 @@ class SimklWLF(WatchlistFlavorBase):
                 }
             }]
         }
-        url = self._URL + '/sync/ratings'
+        url = f"{self._URL}/sync/ratings"
         if score == 0:
-            url += '/remove'
+            url = f"{url}/remove"
 
-        r = self._post_request(url, headers=self.__headers(), json=data)
-        if r:
-            r = json.loads(r)
+        r = requests.post(url, headers=self.__headers(), json=data)
+        if r.ok:
+            r = r.json()
             if not r['not_found']['shows'] or not r['not_found']['movies']:
                 return True
         return False
@@ -337,9 +330,9 @@ class SimklWLF(WatchlistFlavorBase):
                 }
             }]
         }
-        r = self._post_request(self._URL + '/sync/history/remove', headers=self.__headers(), json=data)
-        if r:
-            r = json.loads(r)
+        r = requests.post(f"{self._URL}/sync/history/remove", headers=self.__headers(), json=data)
+        if r.ok:
+            r = r.json()
             if not r['not_found']['shows'] or not r['not_found']['movies']:
                 return True
         return False

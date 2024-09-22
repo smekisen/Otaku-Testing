@@ -1,5 +1,5 @@
-Changelog v0.0.15 (2024-07-17)
-- Merged Joezito's Changelog with main
+Changelog v1.0.19 (2024-07-25)
+- Install Error
 
 Changelog v1.0.18 (2024-07-11)
 - Fixed some bugs
