@@ -662,14 +662,6 @@ msgctxt "#30403"
 msgid "Gogo"
 msgstr ""
 
-msgctxt "#30404"
-msgid "Aniwave"
-msgstr ""
-
-msgctxt "#30405"
-msgid "Animixplay"
-msgstr ""
-
 msgctxt "#30410"
 msgid "Local Files"
 msgstr ""
@@ -721,4 +713,72 @@ msgstr ""
 
 msgctxt "#30511"
 msgid "Hide Next up Widget"
+msgstr ""
+
+msgctxt "#30512"
+msgid "Force view types on menus"
+msgstr ""
+
+msgctxt "#30513"
+msgid "Use Custom View IDs (Advanced)"
+msgstr ""
+
+msgctxt "#30514"
+msgid "General Menu View"
+msgstr ""
+
+msgctxt "#30515"
+msgid "Anime View"
+msgstr ""
+
+msgctxt "#30516"
+msgid "Episode View"
+msgstr ""
+
+msgctxt "#30517"
+msgid "General Menu View ID"
+msgstr ""
+
+msgctxt "#30518"
+msgid "Anime View ID"
+msgstr ""
+
+msgctxt "#30519"
+msgid "Episode View ID"
+msgstr ""
+
+msgctxt "#30520"
+msgid "Default"
+msgstr ""
+
+msgctxt "#30521"
+msgid "Poster"
+msgstr ""
+
+msgctxt "#30522"
+msgid "Icon Wall"
+msgstr ""
+
+msgctxt "#30523"
+msgid "Shift"
+msgstr ""
+
+msgctxt "#30524"
+msgid "Info Wall"
+msgstr ""
+
+msgctxt "#30525"
+msgid "Wide List"
+msgstr ""
+
+msgctxt "#30526"
+msgid "Wall"
+msgstr ""
+
+msgctxt "#30527"
+msgid "Banner"
+msgstr ""
+
+msgctxt "#30528"
+msgid "Fanart"
 msgstr ""

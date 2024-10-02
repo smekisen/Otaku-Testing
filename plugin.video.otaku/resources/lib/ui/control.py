@@ -308,13 +308,23 @@ def draw_items(video_data, content_type=None, draw_cm=None):
             if xbmc.getCondVisibility("Container.HasFiles"):
                 break
             xbmc.sleep(100)
-    if settingids.viewtypes:
-        if content_type == 'tvshows':
-            xbmc.executebuiltin('Container.SetViewMode(%d)' % get_view_type(getSetting('interface.viewtypes.tvshows')))
-        elif content_type == 'episodes':
-            xbmc.executebuiltin('Container.SetViewMode(%d)' % get_view_type(getSetting('interface.viewtypes.episodes')))
+    if getSetting('general.viewtype') == 'true':
+        if getSetting('general.viewidswitch') == 'true':
+            # Use integer view types
+            if content_type == 'addons':
+                xbmc.executebuiltin('Container.SetViewMode(%d)' % int(getSetting('general.addon.view.id')))
+            elif content_type == 'tvshows':
+                xbmc.executebuiltin('Container.SetViewMode(%d)' % int(getSetting('general.show.view.id')))
+            elif content_type == 'episodes':
+                xbmc.executebuiltin('Container.SetViewMode(%d)' % int(getSetting('general.episode.view.id')))
         else:
-            xbmc.executebuiltin('Container.SetViewMode(%d)' % get_view_type(getSetting('interface.viewtypes.general')))
+            # Use optional view types
+            if content_type == 'addons':
+                xbmc.executebuiltin('Container.SetViewMode(%d)' % get_view_type(getSetting('general.addon.view')))
+            elif content_type == 'tvshows':
+                xbmc.executebuiltin('Container.SetViewMode(%d)' % get_view_type(getSetting('general.show.view')))
+            elif content_type == 'episodes':
+                xbmc.executebuiltin('Container.SetViewMode(%d)' % get_view_type(getSetting('general.episode.view')))
 
     # move to episode position currently watching
     if content_type == "episodes" and settingids.smart_scroll:
@@ -338,7 +348,6 @@ def bulk_player_list(video_data, draw_cm=None, bulk_add=True):
 
 
 def get_view_type(viewtype):
-    # viewtypes = [50, 51, 53, 54, 55, 500, 501, 502]
     viewTypes = {
         'Default': 50,
         'Poster': 51,
@@ -403,7 +412,6 @@ class SettingIDs:
         # Bools
         self.showuncached = getBool('show.uncached')
         self.smart_scroll = getBool('general.smart.scroll.enable')
-        self.viewtypes = getBool('interface.viewtypes.bool')
         self.clearlogo_disable = getBool('interface.clearlogo.disable')
         self.fanart_disable = getBool('interface.fanart.disable')
         self.watchlist_sync = getBool('watchlist.sync.enabled')

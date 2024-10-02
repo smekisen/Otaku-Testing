@@ -45,18 +45,20 @@
   </extension>
   <extension point="xbmc.service" library="service.py" />
   <extension point="xbmc.addon.metadata">
-    <summary lang="en">otaku - This Addon is currently in beta. Please be aware there may be bugs present</summary>
+    <summary lang="en">Otaku - Global Context Menu Items</summary>
     <description lang="en">Adds Global Contextual Menu Items for otaku menu items throughout Kodi
     </description>
     <platform>all</platform>
     <license>GPL-3.0</license>
-<!--    <forum></forum>-->
-<!--    <website></website>-->
-<!--    <source></source>-->
-<!--    <disclaimer lang="en"></disclaimer>-->
+    <forum></forum>
+    <website></website>
+    <source></source>
+    <disclaimer lang="en"></disclaimer>
     <assets>
       <icon>icon.png</icon>
       <fanart>fanart.jpg</fanart>
+      <clearlogo>logo.png</clearlogo>
+      <poster>poster.png</poster>
     </assets>
   </extension>
 </addon>
