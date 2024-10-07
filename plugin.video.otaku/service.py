@@ -3,7 +3,7 @@ import requests
 import os
 import json
 
-from resources.lib.ui import control, database_sync
+from resources.lib.ui import control, database_sync, database
 
 
 def refresh_apis():
@@ -90,13 +90,18 @@ def update_keys():
     if aniwave:
         control.setSetting('keys.aniwave', json.dumps(aniwave))
 
-def getChangeLog():
-    with open(os.path.join(control.ADDON_PATH, 'changelog.txt')) as f:
-        changelog_text = f.read()
 
-    heading = '[B]%s -  v%s - ChangeLog[/B]' % (control.ADDON_NAME, control.ADDON_VERSION)
+def getChangeLog():
+    changelog_path = os.path.join(control.ADDON_PATH, 'changelog.txt')
+    news_path = os.path.join(control.ADDON_PATH, 'news.txt')
+    
+    with open(changelog_path) as changelog_file, open(news_path) as news_file:
+        changelog_text = changelog_file.read()
+        news_text = news_file.read()
+    
+    heading = '[B]%s -  v%s - ChangeLog & News[/B]' % (control.ADDON_NAME, control.ADDON_VERSION)
     from resources.lib.windows.textviewer import TextViewerXML
-    windows = TextViewerXML('textviewer.xml', control.ADDON_PATH, heading=heading, text=changelog_text)
+    windows = TextViewerXML('textviewer.xml', control.ADDON_PATH, heading=heading, changelog_text=changelog_text, news_text=news_text)
     windows.run()
     del windows
 
@@ -131,8 +136,14 @@ def version_check():
     control.log(f'### Python: {control.sys.version}')
     control.log(f'### SQLite: {database_sync.sqlite_version}')
     control.log(f'### Kodi Version: {control.kodi_version}')
-
+    
     if control.getSetting('otaku.version') != control.ADDON_VERSION:
+        showchangelog = control.getSetting("general.showchangelog")
+        cache = control.getSetting("changelog.clean_cache")
+        if showchangelog == "Yes":
+            getChangeLog
+        if cache == "true":
+            database.cache_clear()
         reuselang = control.getSetting('reuselanguageinvoker.status')
         toggle_reuselanguageinvoker(reuselang)
         control.setSetting('otaku.version', control.ADDON_VERSION)

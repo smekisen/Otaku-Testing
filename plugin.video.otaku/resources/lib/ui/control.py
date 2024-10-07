@@ -308,23 +308,23 @@ def draw_items(video_data, content_type=None, draw_cm=None):
             if xbmc.getCondVisibility("Container.HasFiles"):
                 break
             xbmc.sleep(100)
-    if getSetting('general.viewtype') == 'true':
-        if getSetting('general.viewidswitch') == 'true':
+    if getSetting('interface.viewtype') == 'true':
+        if getSetting('interface.viewidswitch') == 'true':
             # Use integer view types
             if content_type == 'addons':
-                xbmc.executebuiltin('Container.SetViewMode(%d)' % int(getSetting('general.addon.view.id')))
+                xbmc.executebuiltin('Container.SetViewMode(%d)' % int(getSetting('interface.addon.view.id')))
             elif content_type == 'tvshows':
-                xbmc.executebuiltin('Container.SetViewMode(%d)' % int(getSetting('general.show.view.id')))
+                xbmc.executebuiltin('Container.SetViewMode(%d)' % int(getSetting('interface.show.view.id')))
             elif content_type == 'episodes':
-                xbmc.executebuiltin('Container.SetViewMode(%d)' % int(getSetting('general.episode.view.id')))
+                xbmc.executebuiltin('Container.SetViewMode(%d)' % int(getSetting('interface.episode.view.id')))
         else:
             # Use optional view types
             if content_type == 'addons':
-                xbmc.executebuiltin('Container.SetViewMode(%d)' % get_view_type(getSetting('general.addon.view')))
+                xbmc.executebuiltin('Container.SetViewMode(%d)' % get_view_type(getSetting('interface.addon.view')))
             elif content_type == 'tvshows':
-                xbmc.executebuiltin('Container.SetViewMode(%d)' % get_view_type(getSetting('general.show.view')))
+                xbmc.executebuiltin('Container.SetViewMode(%d)' % get_view_type(getSetting('interface.show.view')))
             elif content_type == 'episodes':
-                xbmc.executebuiltin('Container.SetViewMode(%d)' % get_view_type(getSetting('general.episode.view')))
+                xbmc.executebuiltin('Container.SetViewMode(%d)' % get_view_type(getSetting('interface.episode.view')))
 
     # move to episode position currently watching
     if content_type == "episodes" and settingids.smart_scroll:
@@ -340,8 +340,12 @@ def draw_items(video_data, content_type=None, draw_cm=None):
         if total_ep > num_watched > 0:
             xbmc.executebuiltin('Action(firstpage)')
             for _ in range(num_watched):
-                xbmc.executebuiltin('Action(Down)')
-
+                if int(getSetting('smart.scroll.direction')) == 0:
+                    xbmc.executebuiltin('Action(Down)')
+                    print('down')
+                else:
+                    xbmc.executebuiltin('Action(Right)')
+                    print('right')
 
 def bulk_player_list(video_data, draw_cm=None, bulk_add=True):
     return [xbmc_add_dir(vid['name'], vid['url'], vid['image'], vid['info'], draw_cm, bulk_add, vid['isfolder'], vid['isplayable']) for vid in video_data]
@@ -358,7 +362,6 @@ def get_view_type(viewtype):
         'Wall': 500,
         'Banner': 501,
         'Fanart': 502,
-        'List': 0
     }
     return viewTypes[viewtype]
 

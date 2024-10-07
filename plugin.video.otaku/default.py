@@ -165,10 +165,16 @@ def PLAY(payload, params):
     _mock_args = {"anilist_id": anilist_id, "episode": episode, 'play': True, 'resume_time': resume_time, 'context': rescrape or source_select}
     if control.getSetting('general.playstyle.episode') == '1' or source_select or rescrape:
         from resources.lib.windows.source_select import SourceSelect
-        SourceSelect(*('source_select.xml', control.ADDON_PATH), actionArgs=_mock_args, sources=sources, rescrape=rescrape).doModal()
+        if control.getSetting('general.dialog') == "4":
+            SourceSelect(*('source_select_az.xml', control.ADDON_PATH), actionArgs=_mock_args, sources=sources, rescrape=rescrape).doModal()
+        else:
+            SourceSelect(*('source_select.xml', control.ADDON_PATH), actionArgs=_mock_args, sources=sources, rescrape=rescrape).doModal()
     else:
         from resources.lib.windows.resolver import Resolver
-        Resolver(*('resolver.xml', control.ADDON_PATH), actionArgs=_mock_args).doModal(sources, {}, False)
+        if control.getSetting('general.dialog') == "4":
+            Resolver(*('resolver_az.xml', control.ADDON_PATH), actionArgs=_mock_args).doModal(sources, {}, False)
+        else:
+            Resolver(*('resolver.xml', control.ADDON_PATH), actionArgs=_mock_args).doModal(sources, {}, False)
     control.exit_code()
 
 
@@ -198,10 +204,16 @@ def PLAY_MOVIE(payload, params):
     control.playList.clear()
     if control.getSetting('general.playstyle.movie') == '1' or source_select or rescrape:
         from resources.lib.windows.source_select import SourceSelect
-        SourceSelect(*('source_select.xml', control.ADDON_PATH), actionArgs=_mock_args, sources=sources, rescrape=rescrape).doModal()
+        if control.getSetting('general.dialog') == "4":
+            SourceSelect(*('source_select_az.xml', control.ADDON_PATH), actionArgs=_mock_args, sources=sources, rescrape=rescrape).doModal()
+        else:
+            SourceSelect(*('source_select.xml', control.ADDON_PATH), actionArgs=_mock_args, sources=sources, rescrape=rescrape).doModal()
     else:
         from resources.lib.windows.resolver import Resolver
-        Resolver(*('resolver.xml', control.ADDON_PATH), actionArgs=_mock_args).doModal(sources, {}, False)
+        if control.getSetting('general.dialog') == "4":
+            Resolver(*('resolver_az.xml', control.ADDON_PATH), actionArgs=_mock_args).doModal(sources, {}, False)
+        else:
+            Resolver(*('resolver.xml', control.ADDON_PATH), actionArgs=_mock_args).doModal(sources, {}, False)
     control.exit_code()
 
 

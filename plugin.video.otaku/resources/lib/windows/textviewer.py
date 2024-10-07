@@ -4,9 +4,10 @@ from xbmcgui import WindowXMLDialog
 class TextViewerXML(WindowXMLDialog):
     def __init__(self, xmlFilename: str, scriptPath: str, *args, **kwargs):
         super().__init__(xmlFilename, scriptPath)
-        self.window_id = 2060
         self.heading = kwargs.get('heading')
-        self.text = kwargs.get('text')
+        self.changelog_text = kwargs.get('changelog_text')
+        self.news_text = kwargs.get('news_text')
+        self.actioned = None
 
     def run(self):
         self.doModal()
@@ -14,12 +15,25 @@ class TextViewerXML(WindowXMLDialog):
 
     def onInit(self):
         self.set_properties()
-        self.setFocusId(self.window_id)
+        self.setFocusId(2060)
 
-    def onAction(self, action):
-        if action in [92, 10]:
+    def onClick(self, controlID):
+        self.handle_action(controlID)
+
+    def handle_action(self, controlID):
+        if controlID in [2060, 1941]:  # Handle scrollbar actions
+            self.actioned = True
             self.close()
 
+    def onAction(self, action):
+        actionID = action.getId()
+
+        if action in [92, 10]:
+            self.close()
+        if actionID == 7:
+            self.handle_action(actionID)
+
     def set_properties(self):
-        self.setProperty('otaku.text', self.text)
+        self.setProperty('otaku.news_text', self.news_text)
+        self.setProperty('otaku.changelog_text', self.changelog_text)
         self.setProperty('otaku.heading', self.heading)

@@ -150,7 +150,7 @@ msgid "Enable search history"
 msgstr ""
 
 msgctxt "#30303"
-msgid "Enable Smart Scroll"
+msgid "Enable Smart Scroll (Only Works in Certain Views)"
 msgstr ""
 
 msgctxt "#30304"
@@ -198,11 +198,11 @@ msgid "Get Watchlist Episode Data"
 msgstr ""
 
 msgctxt "#30315"
-msgid "Disable Title Names and Plot"
+msgid "Hide Episode Info and Plot"
 msgstr ""
 
 msgctxt "#30316"
-msgid "Show Empty Episode Meta"
+msgid "Hide Unaired Episodes"
 msgstr ""
 
 msgctxt "#30317"
@@ -214,7 +214,7 @@ msgid "Disable Clearlogo"
 msgstr ""
 
 msgctxt "#30319"
-msgid "Theme"
+msgid "Icon Themes"
 msgstr ""
 
 msgctxt "#30320"
@@ -782,3 +782,36 @@ msgstr ""
 msgctxt "#30528"
 msgid "Fanart"
 msgstr ""
+
+msgctxt "#30529"
+msgid "Show Changelog every update"
+msgstr ""
+
+msgctxt "#30530"
+msgid "Clean Cache On Update"
+msgstr ""
+
+msgctxt "#30531"
+msgid "Smart Scroll Direction"
+msgstr ""
+
+msgctxt "#30532"
+msgid "Vertical"
+msgstr ""
+
+msgctxt "#30533"
+msgid "Horizontal"
+msgstr ""
+
+msgctxt "#30534"
+msgid "Dialog Theme (Use only if you're on the skin)"
+msgstr ""
+
+msgctxt "#30535"
+msgid "Get Watch Order"
+msgstr ""
+
+msgctxt "#30536"
+msgid "Miscellaneous"
+msgstr ""
+
