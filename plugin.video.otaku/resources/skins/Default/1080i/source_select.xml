@@ -82,7 +82,7 @@
                     <font>font12</font>
                     <textcolor>AAFFFFFF</textcolor>
                     <align>center</align>
-                    <autoscroll>true</autoscroll>
+                    <autoscroll delay="3000" time="2500" repeat="10000">true</autoscroll>
                     <label>$INFO[Window().Property(item.info.plot)]</label>
                 </control>
             </control>

@@ -21,7 +21,7 @@ class SourceSelect(BaseWindow):
 
         episode = actionArgs.get('episode')
         if episode:
-            anime_init = OtakuBrowser.get_anime_init(actionArgs.get('anilist_id'))
+            anime_init = OtakuBrowser.get_anime_init(actionArgs.get('mal_id'))
             episode = int(episode)
             try:
                 self.setProperty('item.info.season', str(anime_init[0][episode - 1]['info']['season']))
@@ -41,12 +41,13 @@ class SourceSelect(BaseWindow):
                 pass
 
         else:
-            show = database.get_show(actionArgs.get('anilist_id'))
+            show = database.get_show(actionArgs.get('mal_id'))
             if show:
                 kodi_meta = pickle.loads(show.get('kodi_meta'))
                 self.setProperty('item.info.plot', kodi_meta.get('plot'))
-                self.setProperty('item.info.rating', str(kodi_meta.get('rating')))
+                self.setProperty('item.info.rating', str(kodi_meta.get('rating', {}).get('score')))
                 self.setProperty('item.info.aired', kodi_meta.get('start_date'))
+                self.setProperty('item.art.thumb', kodi_meta.get('poster'))
                 try:
                     self.setProperty('item.info.year', kodi_meta.get('start_date').split('-')[0])
                 except AttributeError:
@@ -110,10 +111,7 @@ class SourceSelect(BaseWindow):
                     self.close()
                     source = [self.sources[self.display_list.getSelectedPosition()]]
                     self.actionArgs['play'] = False
-                    if control.getSetting('general.dialog') == "4":
-                        return_data = Resolver(*('resolver_az.xml', control.ADDON_PATH), actionArgs=self.actionArgs, source_select=True).doModal(source, {}, False)
-                    else:
-                        return_data = Resolver(*('resolver.xml', control.ADDON_PATH), actionArgs=self.actionArgs, source_select=True).doModal(source, {}, False)
+                    return_data = Resolver(*('resolver.xml', control.ADDON_PATH), actionArgs=self.actionArgs, source_select=True).doModal(source, {}, False)
                     if isinstance(return_data, dict):
                         Manager().download_file(return_data['link'])
 
@@ -138,9 +136,6 @@ class SourceSelect(BaseWindow):
             selected_source = self.sources[self.position]
             selected_source['name'] = selected_source['release_title']
         self.actionArgs['close'] = self.close
-        if control.getSetting('general.dialog') == "4":
-            self.stream_link = Resolver(*('resolver_az.xml', control.ADDON_PATH), actionArgs=self.actionArgs, source_select=True).doModal(sources, {}, pack_select)
-        else:
-            self.stream_link = Resolver(*('resolver.xml', control.ADDON_PATH), actionArgs=self.actionArgs, source_select=True).doModal(sources, {}, pack_select)
+        self.stream_link = Resolver(*('resolver.xml', control.ADDON_PATH), actionArgs=self.actionArgs, source_select=True).doModal(sources, {}, pack_select)
         if isinstance(self.stream_link, dict):
             self.close()

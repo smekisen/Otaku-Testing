@@ -143,7 +143,6 @@ class MyAnimeListWLF(WatchlistFlavorBase):
     @div_flavor
     def _base_watchlist_status_view(self, res, mal_dub=None, dubsub_filter=None):
         mal_id = res['node']['id']
-        anilist_id = ''
         dub = True if mal_dub and mal_dub.get(str(mal_id)) else False
 
         title = res['node'].get('title')
@@ -157,7 +156,7 @@ class MyAnimeListWLF(WatchlistFlavorBase):
         info = {
             'title': title,
             'plot': res['node']['synopsis'],
-            'rating': res['node'].get('mean'),
+            'rating': {'score': res['node'].get('mean', 0)},
             'duration': res['node']['average_episode_duration'],
             'genre': [x.get('name') for x in res['node']['genres']],
             'status': res['node']['status'],
@@ -175,14 +174,14 @@ class MyAnimeListWLF(WatchlistFlavorBase):
 
         base = {
             "name": f"{title} - {eps_watched}/{eps}",
-            "url": f'watchlist_to_ep/{anilist_id}/{mal_id}/{eps_watched}',
+            "url": f'watchlist_to_ep/{mal_id}/{eps_watched}',
             "image": image,
             "info": info,
             'fanart': image
         }
 
         if res['node']['media_type'] == 'movie' and eps == 1:
-            base['url'] = f'play_movie/{anilist_id}/{mal_id}/'
+            base['url'] = f'play_movie/{mal_id}/'
             base['info']['mediatype'] = 'movie'
             return utils.parse_view(base, False, True, dub=dub, dubsub_filter=dubsub_filter)
         return utils.parse_view(base, True, False, dub=dub, dubsub_filter=dubsub_filter)
@@ -204,7 +203,7 @@ class MyAnimeListWLF(WatchlistFlavorBase):
         title = f"{base_title} - {next_up}/{eps_total}"
         poster = image = res['node']['main_picture'].get('large', res['node']['main_picture']['medium'])
 
-        anilist_id, next_up_meta, show = self._get_next_up_meta(mal_id, eps_watched)
+        mal_id, next_up_meta, show = self._get_next_up_meta(mal_id, eps_watched)
         if next_up_meta:
             if next_up_meta.get('title'):
                 title = f'{title} - {next_up_meta["title"]}'
@@ -227,7 +226,7 @@ class MyAnimeListWLF(WatchlistFlavorBase):
 
         base = {
             "name": title,
-            "url": f'watchlist_to_ep/{anilist_id}/{mal_id}/{eps_watched}',
+            "url": f'watchlist_to_ep/{mal_id}/{eps_watched}',
             "image": image,
             "info": info,
             "fanart": image,
@@ -235,21 +234,17 @@ class MyAnimeListWLF(WatchlistFlavorBase):
         }
 
         if res['node']['media_type'] == 'movie' and eps_total == 1:
-            base['url'] = f'play_movie/{anilist_id}/{mal_id}/'
+            base['url'] = f'play_movie/{mal_id}/'
             base['info']['mediatype'] = 'movie'
             return utils.parse_view(base, False, True)
 
         if next_up_meta:
-            base['url'] = f"play/{anilist_id}/{next_up}"
+            base['url'] = f"play/{mal_id}/{next_up}"
             return utils.parse_view(base, False, True)
 
         return utils.parse_view(base, True, False)
 
-    def get_watchlist_anime_entry(self, anilist_id):
-        mal_id = self._get_mapping_id(anilist_id, 'mal_id')
-        if not mal_id:
-            return {}
-
+    def get_watchlist_anime_entry(self, mal_id):
         params = {
             "fields": 'my_list_status'
         }
@@ -268,15 +263,13 @@ class MyAnimeListWLF(WatchlistFlavorBase):
 
     def save_completed(self):
         import json
-        from resources.lib.ui import database
 
         data = self.get_user_anime_list('completed')
         completed_ids = {}
         for dat in data:
             mal_id = dat['node']['id']
             try:
-                anilist_id = database.get_mappings(mal_id, 'mal_id')['anilist_id']
-                completed_ids[str(anilist_id)] = int(dat['node']['num_episodes'])
+                completed_ids[str(mal_id)] = int(dat['node']['num_episodes'])
             except KeyError:
                 pass
 
@@ -306,39 +299,27 @@ class MyAnimeListWLF(WatchlistFlavorBase):
             data += res['data']
         return data
 
-    def update_list_status(self, anilist_id, status):
-        mal_id = self._get_mapping_id(anilist_id, 'mal_id')
-        if not mal_id:
-            return False
+    def update_list_status(self, mal_id, status):
         data = {
             "status": status,
         }
         r = requests.put(f'{self._URL}/anime/{mal_id}/my_list_status', headers=self.__headers(), data=data)
         return r.ok
 
-    def update_num_episodes(self, anilist_id, episode):
-        mal_id = self._get_mapping_id(anilist_id, 'mal_id')
-        if not mal_id:
-            return False
+    def update_num_episodes(self, mal_id, episode):
         data = {
             'num_watched_episodes': int(episode)
         }
         r = requests.put(f'{self._URL}/anime/{mal_id}/my_list_status', headers=self.__headers(), data=data)
         return r.ok
 
-    def update_score(self, anilist_id, score):
-        mal_id = self._get_mapping_id(anilist_id, 'mal_id')
-        if not mal_id:
-            return False
+    def update_score(self, mal_id, score):
         data = {
             "score": score,
         }
         r = requests.put(f'{self._URL}/anime/{mal_id}/my_list_status', headers=self.__headers(), data=data)
         return r.ok
 
-    def delete_anime(self, anilist_id):
-        mal_id = self._get_mapping_id(anilist_id, 'mal_id')
-        if not mal_id:
-            return False
+    def delete_anime(self, mal_id):
         r = requests.delete(f'{self._URL}/anime/{mal_id}/my_list_status', headers=self.__headers())
         return r.ok

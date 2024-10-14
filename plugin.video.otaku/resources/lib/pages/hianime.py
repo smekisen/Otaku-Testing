@@ -15,8 +15,8 @@ class Sources(BrowserBase):
     _BASE_URL = 'https://hianime.to/'
     js_file = 'https://megacloud.tv/js/player/a/prod/e1-player.min.js'
 
-    def get_sources(self, anilist_id, episode):
-        show = database.get_show(anilist_id)
+    def get_sources(self, mal_id, episode):
+        show = database.get_show(mal_id)
         kodi_meta = pickle.loads(show['kodi_meta'])
         title = kodi_meta['name']
         title = self._clean_title(title)
@@ -29,7 +29,7 @@ class Sources(BrowserBase):
         elif control.getSetting('general.source') == 'Dub':
             srcs.remove('sub')
 
-        items = malsync.get_slugs(anilist_id=anilist_id, site='Zoro')
+        items = malsync.get_slugs(mal_id=mal_id, site='Zoro')
         if not items:
             if kodi_meta.get('start_date'):
                 year = kodi_meta.get('start_date').split('-')[0]

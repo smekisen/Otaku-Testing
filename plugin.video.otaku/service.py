@@ -73,22 +73,10 @@ def sync_watchlist(silent=False):
 def update_dub_json():
     control.log("### Updating Dub json")
     with open(control.maldubFile, 'w') as file:
-        mal_dub_raw = requests.get('https://raw.githubusercontent.com/MAL-Dubs/MAL-Dubs/main/data/dubInfo.json')
-        mal_dub_list = mal_dub_raw.json()["dubbed"]
+        r = requests.get('https://raw.githubusercontent.com/MAL-Dubs/MAL-Dubs/main/data/dubInfo.json')
+        mal_dub_list = r.json()["dubbed"]
         mal_dub = {str(item): {'dub': True} for item in mal_dub_list}
         json.dump(mal_dub, file)
-
-
-def update_keys():
-    control.log("### Updating Keys")
-    kurl = 'https://raw.githubusercontent.com/Ciarands/vidsrc-keys/main/keys.json'
-    resp = requests.get(kurl).json()
-    vidplay = resp.get('embed', {}).get('keys')
-    if vidplay:
-        control.setSetting('keys.vidplay', json.dumps(vidplay))
-    aniwave = resp.get('aniwave', {}).get('keys')
-    if aniwave:
-        control.setSetting('keys.aniwave', json.dumps(aniwave))
 
 
 def getChangeLog():
@@ -136,14 +124,11 @@ def version_check():
     control.log(f'### Python: {control.sys.version}')
     control.log(f'### SQLite: {database_sync.sqlite_version}')
     control.log(f'### Kodi Version: {control.kodi_version}')
-    
+
     if control.getSetting('otaku.version') != control.ADDON_VERSION:
         showchangelog = control.getSetting("general.showchangelog")
-        cache = control.getSetting("changelog.clean_cache")
         if showchangelog == "Yes":
             getChangeLog
-        if cache == "true":
-            database.cache_clear()
         reuselang = control.getSetting('reuselanguageinvoker.status')
         toggle_reuselanguageinvoker(reuselang)
         control.setSetting('otaku.version', control.ADDON_VERSION)
@@ -159,13 +144,11 @@ if __name__ == "__main__":
         update_mappings_db()
         update_dub_json()
         sync_watchlist(True)
-        update_keys()
         control.setSetting('update.time.30', str(int(time.time())))
         control.setSetting('update.time.7', str(int(time.time())))
     else:
         if time.time() > int(control.getSetting('update.time.30')) + 2_592_000:   # 30 days
             update_mappings_db()
-            update_keys()
             control.setSetting('update.time.30', str(int(time.time())))
         if time.time() > int(control.getSetting('update.time.7')) + 604_800:   # 7 days
             update_dub_json()

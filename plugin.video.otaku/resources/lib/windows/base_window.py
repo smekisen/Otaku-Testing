@@ -13,9 +13,9 @@ class BaseWindow(xbmcgui.WindowXMLDialog):
         if actionArgs is None or (item_type := actionArgs.get('item_type')) == 'skip_intro':
             return
 
-        if anilist_id := actionArgs.get('anilist_id'):
-            self.item_information = pickle.loads(database.get_show(actionArgs['anilist_id'])['kodi_meta'])
-            show_meta = database.get_show_meta(actionArgs['anilist_id'])
+        if mal_id := actionArgs.get('mal_id'):
+            self.item_information = pickle.loads(database.get_show(actionArgs['mal_id'])['kodi_meta'])
+            show_meta = database.get_show_meta(actionArgs['mal_id'])
             if show_meta:
                 self.item_information.update(pickle.loads(show_meta.get('art')))
         elif item_type == 'playing_next':
@@ -35,7 +35,7 @@ class BaseWindow(xbmcgui.WindowXMLDialog):
         else:
             if isinstance(fanart, list):
                 if control.settingids.fanart_select:
-                    fanart_select = control.getSetting(f'fanart.select.anilist.{anilist_id}')
+                    fanart_select = control.getSetting(f'fanart.select.{mal_id}')
                     fanart = fanart_select if fanart_select else random.choice(fanart)
                 else:
                     fanart = random.choice(fanart)
