@@ -26,20 +26,20 @@ class JikanAPI:
             res_data = res['data']
         else:
             res_data = res['data']
-            for i in range(2, res['pagination']['last_visible_page']):
+            for i in range(2, res['pagination']['last_visible_page'] + 1):
                 params = {
                     'page': i
                 }
-                if (i - 1) % 3 == 0:
-                    time.sleep(2)
                 r = requests.get(url, params=params)
                 if not r.ok:
-                    control.ok_dialog(control.ADDON_NAME, r.json())
+                    control.ok_dialog(control.ADDON_NAME, f"{r.json()}")
                     return res_data
                 res = r.json()
+                res_data += res['data']
                 if not res['pagination']['has_next_page']:
                     break
-                res_data += res['data']
+                if i % 3 == 0:
+                    time.sleep(2)
         return res_data
 
     @staticmethod
@@ -64,7 +64,7 @@ class JikanAPI:
 
         try:
             filler = filler_data[episode - 1]
-        except IndexError:
+        except (IndexError, TypeError):
             filler = ''
 
         code = jz.get_second_label(info, dub_data)

@@ -8,10 +8,10 @@ from resources.lib.ui import control, database, utils
 
 if control.settingids.browser_api == 'mal':
     from resources.lib.MalBrowser import MalBrowser
-    _BROWSER = MalBrowser()
+    BROWSER = MalBrowser()
 else:
     from resources.lib.AniListBrowser import AniListBrowser
-    _BROWSER = AniListBrowser()
+    BROWSER = AniListBrowser()
 
 def parse_history_view(res):
     return utils.allocate_item(res, f'search/{res}/1', True, False)
@@ -69,7 +69,7 @@ def get_backup(mal_id, source):
 def get_anime_init(mal_id):
     show_meta = database.get_show_meta(mal_id)
     if not show_meta:
-        _BROWSER.get_anime(mal_id)
+        BROWSER.get_anime(mal_id)
         show_meta = database.get_show_meta(mal_id)
         if not show_meta:
             return [], 'episodes'
@@ -96,7 +96,7 @@ def get_anime_init(mal_id):
 
 def get_sources(mal_id, episode, media_type, rescrape=False, source_select=False, silent=False):
     if not (show := database.get_show(mal_id)):
-        show = _BROWSER.get_anime(mal_id)
+        show = BROWSER.get_anime(mal_id)
     kodi_meta = pickle.loads(show['kodi_meta'])
     actionArgs = {
         'query': kodi_meta['query'],

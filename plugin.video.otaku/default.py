@@ -24,14 +24,8 @@ import pickle
 from resources.lib import OtakuBrowser
 from resources.lib.ui import control, database, utils
 from resources.lib.ui.router import Route, router_process
-from resources.lib.WatchlistIntegration import add_watchlist, watchlist_update_episode
-
-if control.settingids.browser_api == 'mal':
-    from resources.lib.MalBrowser import MalBrowser
-    _BROWSER = MalBrowser()
-else:
-    from resources.lib.AniListBrowser import AniListBrowser
-    _BROWSER = AniListBrowser()
+from resources.lib.WatchlistIntegration import add_watchlist
+from resources.lib.OtakuBrowser import BROWSER
 
 
 def add_last_watched(items):
@@ -56,37 +50,37 @@ def ANIMES_PAGE(payload, params):
 def FIND_RECOMMENDATIONS(payload, params):
     path, mal_id, eps_watched = payload.rsplit("/")
     page = params.get('page', 1)
-    control.draw_items(_BROWSER.get_recommendations(mal_id, int(page)), 'tvshows')
+    control.draw_items(BROWSER.get_recommendations(mal_id, int(page)), 'tvshows')
 
 
 @Route('find_relations/*')
 def FIND_RELATIONS(payload, params):
     path, mal_id, eps_watched = payload.rsplit("/")
-    control.draw_items(_BROWSER.get_relations(mal_id), 'tvshows')
+    control.draw_items(BROWSER.get_relations(mal_id), 'tvshows')
 
 
 @Route('airing_anime/*')
 def ANILIST_AIRING_ANIME(payload, params):
-    control.draw_items(_BROWSER.get_airing_anime(int(payload)), 'tvshows')
+    control.draw_items(BROWSER.get_airing_anime(int(payload)), 'tvshows')
 
 
 @Route('upcoming_next_season/*')
 def ANILIST_UPCOMING_NEXT_SEASON(payload, params):
-    control.draw_items(_BROWSER.get_upcoming_next_season(int(payload)), 'tvshows')
+    control.draw_items(BROWSER.get_upcoming_next_season(int(payload)), 'tvshows')
 
 
 @Route('top_100_anime/*')
 def ANILIST_TOP_100_ANIME_PAGES(payload, params):
-    control.draw_items(_BROWSER.get_top_100_anime(int(payload)), 'tvshows')
+    control.draw_items(BROWSER.get_top_100_anime(int(payload)), 'tvshows')
 
 
 @Route('genres/*')
 def ANILIST_GENRES_PAGES(payload, params):
     genres, tags, page = payload.rsplit("/")
     if genres or tags:
-        control.draw_items(_BROWSER.genres_payload(genres, tags, int(page)), 'tvshows')
+        control.draw_items(BROWSER.genres_payload(genres, tags, int(page)), 'tvshows')
     else:
-        control.draw_items(_BROWSER.get_genres(), 'tvshows')
+        control.draw_items(BROWSER.get_genres(), 'tvshows')
 
 
 @Route('search_history')
@@ -108,9 +102,9 @@ def SEARCH(payload, params):
             return control.draw_items([], 'tvshows')
         if int(control.getSetting('searchhistory')) == 0:
             database.addSearchHistory(query, 'show')
-        control.draw_items(_BROWSER.get_search(query), 'tvshows')
+        control.draw_items(BROWSER.get_search(query), 'tvshows')
     else:
-        control.draw_items(_BROWSER.get_search(query, int(page)), 'tvshows')
+        control.draw_items(BROWSER.get_search(query, int(page)), 'tvshows')
 
 
 @Route('remove_search_item/*')
@@ -191,6 +185,8 @@ def PLAY_MOVIE(payload, params):
 @Route('marked_as_watched/*')
 def MARKED_AS_WATCHED(payload, params):
     from resources.lib.WatchlistFlavor import WatchlistFlavor
+    from resources.lib.WatchlistIntegration import watchlist_update_episode
+
     mal_id, episode = payload.rsplit("/")
     flavor = WatchlistFlavor.get_update_flavor()
     watchlist_update_episode(mal_id, episode)
@@ -259,7 +255,7 @@ def FANART(payload, params):
     if '' in fanart_all:
         fanart_all.remove('')
     fanart_all += [str(mal_id)]
-    control.setSetting(f'fanart.select.mal_id.{mal_id}', fanart[int(select)])
+    control.setSetting(f'fanart.select.{mal_id}', fanart[int(select)])
     control.setSetting(f'fanart.all', ",".join(fanart_all))
     control.ok_dialog(control.ADDON_NAME, f"Fanart Set to {fanart_display[int(select)]}")
 
@@ -420,6 +416,6 @@ if __name__ == "__main__":
         if not xbmc.Player().isPlaying():
             control.playList.clear()
 
-    # t1 = time.perf_counter_ns()
-    # totaltime = (t1-t0)/1_000_000
-    # control.print(totaltime, 'ms')
+# t1 = time.perf_counter_ns()
+# totaltime = (t1-t0)/1_000_000
+# control.print(totaltime, 'ms')

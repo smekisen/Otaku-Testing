@@ -4,7 +4,8 @@ from resources.lib.ui import control, database
 from resources.lib.ui.router import Route
 from resources.lib.WatchlistFlavor import WatchlistFlavor
 from resources.lib import OtakuBrowser
-from resources.lib.AniListBrowser import AniListBrowser
+
+BROWSER = OtakuBrowser.BROWSER
 
 
 def get_auth_dialog(flavor):
@@ -58,7 +59,7 @@ def WATCHLIST_TO_EP(payload, params):
     mal_id, eps_watched = payload_list
     show_meta = database.get_show(mal_id)
     if not show_meta:
-        show_meta = AniListBrowser().get_anime(mal_id)
+        show_meta = BROWSER.get_anime(mal_id)
     kodi_meta = pickle.loads(show_meta['kodi_meta'])
     kodi_meta['eps_watched'] = eps_watched
     database.update_kodi_meta(mal_id, kodi_meta)
@@ -76,7 +77,7 @@ def CONTEXT_MENU(payload, params):
     path, mal_id, eps_watched = payload_list
 
     if not (show := database.get_show(mal_id)):
-        show = AniListBrowser().get_anime(mal_id)
+        show = BROWSER.get_anime(mal_id)
 
     if not (flavor := WatchlistFlavor.get_update_flavor()):
         control.ok_dialog(control.ADDON_NAME, 'No Watchlist Enabled: \n\nPlease Enable a Watchlist before using the Watchlist Manager')

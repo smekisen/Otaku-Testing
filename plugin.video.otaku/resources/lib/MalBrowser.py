@@ -1,3 +1,4 @@
+import time
 import requests
 import json
 import random
@@ -83,16 +84,17 @@ class MalBrowser:
         relations = database.get_(self.get_base_res, 24, f'{self._URL}/anime/{mal_id}/relations')
 
         relation_res = []
+        count = 0
         for relation in relations['data']:
             for entry in relation['entry']:
                 if entry['type'] == 'anime':
-                    res = {
-                        'mal_id': entry['mal_id'],
-                        'relation': relation['relation'],
-                        'title': entry['name']
-                    }
-                    relation_res.append(res)
-        mapfunc = partial(self.recommendation_relation_view, completed=self.open_completed())
+                    res_data = database.get_(self.get_base_res, 24, f"{self._URL}/anime/{mal_id}")['data']
+                    res_data['relation'] = relation['relation']
+                    relation_res.append(res_data)
+                    if count % 3 == 0:
+                        time.sleep(2)
+                    count += 1
+        mapfunc = partial(self.base_mal_view, completed=self.open_completed())
         all_results = list(map(mapfunc, relation_res))
         return all_results
 
@@ -240,6 +242,9 @@ class MalBrowser:
         kodi_meta = pickle.loads(show_meta.get('art')) if show_meta else {}
 
         title = res[self._TITLE_LANG] or res['title']
+
+        if res.get('relation'):
+            title += ' [I]%s[/I]' % control.colorstr(res['relation'], 'limegreen')
 
         info = {
             'UniqueIDs': {'mal_id': str(mal_id)},

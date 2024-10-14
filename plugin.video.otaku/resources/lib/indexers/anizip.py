@@ -40,7 +40,7 @@ class ANIZIPAPI:
             'episode': episode,
             'tvshowtitle': tvshowtitle,
             'mediatype': 'episode',
-            'rating': float(res.get('rating', 0))
+            'rating': {'score': float(res.get('rating', 0))}
         }
         if eps_watched and int(eps_watched) >= episode:
             info['playcount'] = 1
