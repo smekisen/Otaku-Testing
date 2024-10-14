@@ -133,7 +133,7 @@ msgid "[B]*Note: If using addon on Amazon Fire TV Stick/Android TV Box, you can 
 msgstr ""
 
 msgctxt "#30045"
-msgid "Provider"
+msgid "Providers"
 msgstr ""
 
 ######SETTINGS.XML VALUES######
@@ -150,7 +150,7 @@ msgid "Enable search history"
 msgstr ""
 
 msgctxt "#30303"
-msgid "Enable Smart Scroll"
+msgid "Smart Episode Scrolling (Only works in List View)"
 msgstr ""
 
 msgctxt "#30304"
@@ -162,7 +162,7 @@ msgid "Meta Episode API"
 msgstr ""
 
 msgctxt "#30306"
-msgid "Interface"
+msgid "Artwork Customization"
 msgstr ""
 
 msgctxt "#30307"
@@ -198,7 +198,7 @@ msgid "Get Watchlist Episode Data"
 msgstr ""
 
 msgctxt "#30315"
-msgid "Disable Title Names and Plot"
+msgid "Hide Episode Info and Plot"
 msgstr ""
 
 msgctxt "#30316"
@@ -316,7 +316,7 @@ msgid "Auto try next link on resolve failure (Source Select)"
 msgstr ""
 
 msgctxt "#30351"
-msgid "Terminate on cloud Sources"
+msgid "Terminate on Cloud Sources"
 msgstr ""
 
 msgctxt "#30352"
@@ -440,7 +440,7 @@ msgid "Main Menu Items"
 msgstr ""
 
 msgctxt "#30382"
-msgid "Search Filter"
+msgid "Content Customization"
 msgstr ""
 
 msgctxt "#30383"
@@ -480,7 +480,7 @@ msgid "Set Delay in Seconds Before Showing Dialog"
 msgstr ""
 
 msgctxt "#30392"
-msgid "Timeout for Sources (seconds)"
+msgid "Timeout for finding Sources (seconds)"
 msgstr ""
 
 msgctxt "#30393"
@@ -589,7 +589,19 @@ msgid "Authorize Premiumize..."
 msgstr ""
 
 msgctxt "#30190"
-msgid "Inspect Cloud Files on Scrape"
+msgid "Scrape Real-Debrid Cloud"
+msgstr ""
+
+msgctxt "#30191"
+msgid "Scrape Premiumize Cloud"
+msgstr ""
+
+msgctxt "#30192"
+msgid "Scrape AllDebrid Cloud"
+msgstr ""
+
+msgctxt "#30193"
+msgid "Scrape Debrid-Link Cloud"
 msgstr ""
 
 ######WatchLists######
@@ -667,12 +679,12 @@ msgid "Gogo"
 msgstr ""
 
 msgctxt "#30410"
-msgid "Local Files"
+msgid "Scrape Local Files"
 msgstr ""
 
 ######Context & Widgets#####
 msgctxt "#30500"
-msgid "Context and Widgets"
+msgid "Context Customization"
 msgstr ""
 
 msgctxt "#30501"
@@ -821,4 +833,44 @@ msgstr ""
 
 msgctxt "#30537"
 msgid "Force view types on menus"
+msgstr ""
+
+msgctxt "#30538"
+msgid "Scrapping"
+msgstr ""
+
+msgctxt "#30539"
+msgid "General Scrapping"
+msgstr ""
+
+msgctxt "#30540"
+msgid "Terminate on Local Sources"
+msgstr ""
+
+msgctxt "#30541"
+msgid "Cloud Scrapping"
+msgstr ""
+
+msgctxt "#30542"
+msgid "Local Scrapping"
+msgstr ""
+
+msgctxt "#30543"
+msgid "Local File Directory"
+msgstr ""
+
+msgctxt "#30544"
+msgid "General Playback"
+msgstr ""
+
+msgctxt "#30545"
+msgid "General Customization"
+msgstr ""
+
+msgctxt "#30546"
+msgid "Mainmenu Customization"
+msgstr ""
+
+msgctxt "#30547"
+msgid "Search Filter"
 msgstr ""
