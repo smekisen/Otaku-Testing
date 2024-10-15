@@ -17,8 +17,8 @@ class GetSources(BaseWindow):
         self.return_data = []
         self.args = actionArgs
         self.progress = 0
-        self.torrents_qual_len = [0, 0, 0, 0]
-        self.embeds_qual_len = [0, 0, 0, 0]
+        self.torrents_qual_len = [0, 0, 0, 0, 0]
+        self.embeds_qual_len = [0, 0, 0, 0, 0]
         self.torrentSources = []
         self.torrentCacheSources = []
         self.embedSources = []
@@ -40,11 +40,12 @@ class GetSources(BaseWindow):
     def getSources(self, args):
         self.setProperty('process_started', 'true')
         if not self.silent:
-            self.update_properties("4K: %s | 1080: %s | 720: %s | SD: %s" % (
+            self.update_properties("4K: %s | 1080: %s | 720: %s | SD: %s| EQ: %s" % (
                 control.colorstr(self.torrents_qual_len[0] + self.embeds_qual_len[0]),
                 control.colorstr(self.torrents_qual_len[1] + self.embeds_qual_len[1]),
                 control.colorstr(self.torrents_qual_len[2] + self.embeds_qual_len[2]),
                 control.colorstr(self.torrents_qual_len[3] + self.embeds_qual_len[3]),
+                control.colorstr(self.torrents_qual_len[4] + self.embeds_qual_len[4])
             ))
         self.close()
 
@@ -59,12 +60,13 @@ class GetSources(BaseWindow):
         self.setProperty('1080p_sources', str(self.torrents_qual_len[1] + self.embeds_qual_len[1]))
         self.setProperty('720p_sources', str(self.torrents_qual_len[2] + self.embeds_qual_len[2]))
         self.setProperty('SD_sources', str(self.torrents_qual_len[3] + self.embeds_qual_len[3]))
+        self.setProperty('EQ_sources', str(self.torrents_qual_len[4] + self.embeds_qual_len[4]))
 
         self.setProperty('total_torrents', str(len(self.torrentSources)))
         self.setProperty('cached_torrents', str(len(self.torrentCacheSources)))
         self.setProperty('hosters_sources', str(len(self.embedSources)))
         self.setProperty('cloud_sources', str(len(self.cloud_files)))
-        self.setProperty('localfiles', str(len(self.local_files)))
+        self.setProperty('local_sources', str(len(self.local_files)))
 
         self.setProperty("remaining_providers_count", str((len(self.remainingProviders))))
 

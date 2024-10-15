@@ -366,42 +366,49 @@ def DOWNLOAD_MANAGER(payload, params):
     DownloadManager(*('download_manager.xml', control.ADDON_PATH)).doModal()
 
 
-@Route('importexport_settings')
-def IMPORTEXPORT_SETTINGS(payload, params):
+@Route('import_settings')
+def IMPORT_SETTINGS(payload, params):
     import os
     import xbmcvfs
 
-    context = control.context_menu(["Import", "Export"])
     setting_xml = os.path.join(control.dataPath, 'settings.xml')
 
     # Import
-    if context == 0:
-        import_location = control.browse(1, f"{control.ADDON_NAME}:  Import Setting", 'files', 'settings.xml')
-        if not import_location:
-            return control.exit_code()
-        if not import_location.endswith('settings.xml'):
-            control.ok_dialog(control.ADDON_NAME, "Invalid File!")
-        else:
-            yesno = control.yesno_dialog(control.ADDON_NAME, "Are you sure you want to replace settings.xml?")
-            if yesno:
-                if xbmcvfs.delete(setting_xml) and xbmcvfs.copy(import_location, setting_xml):
-                    control.ok_dialog(control.ADDON_NAME, "Replaced settings.xml")
-                else:
-                    control.ok_dialog(control.ADDON_NAME, "Could Not Import File!")
+    import_location = control.browse(1, f"{control.ADDON_NAME}: Import Setting", 'files', 'settings.xml')
+    if not import_location:
+        return control.exit_code()
+    if not import_location.endswith('settings.xml'):
+        control.ok_dialog(control.ADDON_NAME, "Invalid File!")
+    else:
+        yesno = control.yesno_dialog(control.ADDON_NAME, "Are you sure you want to replace settings.xml?")
+        if yesno:
+            if xbmcvfs.delete(setting_xml) and xbmcvfs.copy(import_location, setting_xml):
+                control.ok_dialog(control.ADDON_NAME, "Replaced settings.xml")
+            else:
+                control.ok_dialog(control.ADDON_NAME, "Could Not Import File!")
+    return control.exit_code()
+
+
+@Route('export_settings')
+def EXPORT_SETTINGS(payload, params):
+    import os
+    import xbmcvfs
+
+    setting_xml = os.path.join(control.dataPath, 'settings.xml')
 
     # Export
-    elif context == 1:
-        export_location = control.browse(3, control.ADDON_NAME, 'files')
-        if not export_location:
-            control.ok_dialog(control.ADDON_NAME, "Please Select Export Location!")
-        else:
-            yesno = control.yesno_dialog(control.ADDON_NAME, "Are you sure you want to save settings.xml?")
-            if yesno:
-                if xbmcvfs.copy(setting_xml, os.path.join(export_location, 'settings.xml')):
-                    control.ok_dialog(control.ADDON_NAME, "Saved settings.xml")
-                else:
-                    control.ok_dialog(control.ADDON_NAME, "Could Not Export File!")
+    export_location = control.browse(3, f"{control.ADDON_NAME}: Export Setting", 'files')
+    if not export_location:
+        control.ok_dialog(control.ADDON_NAME, "Please Select Export Location!")
+    else:
+        yesno = control.yesno_dialog(control.ADDON_NAME, "Are you sure you want to save settings.xml?")
+        if yesno:
+            if xbmcvfs.copy(setting_xml, os.path.join(export_location, 'settings.xml')):
+                control.ok_dialog(control.ADDON_NAME, "Saved settings.xml")
+            else:
+                control.ok_dialog(control.ADDON_NAME, "Could Not Export File!")
     return control.exit_code()
+
 
 @Route('toggleLanguageInvoker')
 def TOGGLE_LANGUAGE_INVOKER(payload, params):

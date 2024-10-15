@@ -12,7 +12,7 @@ from resources.lib.indexers import malsync
 
 
 class Sources(BrowserBase):
-    _BASE_URL = 'https://hianime.to/'
+    _BASE_URL = 'https://hianime.sx/' if control.getBool('provider.hianimealt') else 'https://hianime.to/'
     js_file = 'https://megacloud.tv/js/player/a/prod/e1-player.min.js'
 
     def get_sources(self, mal_id, episode):

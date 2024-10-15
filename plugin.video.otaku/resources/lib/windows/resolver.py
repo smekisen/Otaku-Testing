@@ -119,7 +119,7 @@ class Resolver(BaseWindow):
                     self.return_data['link'] = stream_link
                     break
 
-            elif i['type'] == 'local_files':
+            elif i['type'] == 'local':
                 stream_link = i['hash']
                 self.return_data = {
                     'url': stream_link,

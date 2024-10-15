@@ -20,11 +20,11 @@ class Sources(GetSources):
         super(Sources, self).__init__(xml_file, location, actionargs)
         self.torrentProviders = ['nyaa', 'animetosho', 'Cloud Inspection']
         self.embedProviders = ['gogo', 'hianime']
-        self.otherProviders = ['Local Files']
-        self.remainingProviders = self.embedProviders + self.torrentProviders + self.otherProviders
+        self.localProviders = ['Local Inspection']
+        self.remainingProviders = self.embedProviders + self.torrentProviders + self.localProviders
 
-        self.torrents_qual_len = [0, 0, 0, 0]
-        self.embeds_qual_len = [0, 0, 0, 0]
+        self.torrents_qual_len = [0, 0, 0, 0, 0]
+        self.embeds_qual_len = [0, 0, 0, 0, 0]
         self.return_data = []
         self.progress = 1
         self.threads = []
@@ -80,15 +80,15 @@ class Sources(GetSources):
             for provider in self.torrentProviders:
                 self.remainingProviders.remove(provider)
 
-#       ###  Other ###
+        ### local ###
         if control.getBool('provider.localfiles'):
-            t = threading.Thread(target=self.localfiles_worker, args=(query, mal_id, episode, rescrape))
+            t = threading.Thread(target=self.user_local_inspection, args=(query, mal_id, episode, rescrape))
             t.start()
             self.threads.append(t)
         else:
-            self.remainingProviders.remove('Local Files')
+            self.remainingProviders.remove('Local Inspection')
 
-#       ### embeds ###
+        ### embeds ###
         if control.getBool('provider.hianime'):
             t = threading.Thread(target=self.hianime_worker, args=(mal_id, episode, rescrape))
             t.start()
@@ -110,19 +110,22 @@ class Sources(GetSources):
         while runtime < timeout:
             if not self.silent:
                 self.updateProgress()
-                self.update_properties("4K: %s | 1080: %s | 720: %s | SD: %s" % (
+                self.update_properties("4K: %s | 1080: %s | 720: %s | SD: %s| EQ: %s" % (
                     control.colorstr(self.torrents_qual_len[0] + self.embeds_qual_len[0]),
                     control.colorstr(self.torrents_qual_len[1] + self.embeds_qual_len[1]),
                     control.colorstr(self.torrents_qual_len[2] + self.embeds_qual_len[2]),
-                    control.colorstr(self.torrents_qual_len[3] + self.embeds_qual_len[3])
+                    control.colorstr(self.torrents_qual_len[3] + self.embeds_qual_len[3]),
+                    control.colorstr(self.torrents_qual_len[4] + self.embeds_qual_len[4])
                 ))
             xbmc.sleep(500)
-
-            if self.canceled or len(self.remainingProviders) < 1 and runtime > 5 or control.settingids.terminateoncloud and len(self.cloud_files) > 0:
+        
+            if (self.canceled or 
+                (control.settingids.terminateoncloud and len(self.cloud_files) > 0) or 
+                (control.settingids.terminateonlocal and len(self.local_files) > 0)):
                 break
             runtime = time.perf_counter() - start_time
             self.progress = runtime / timeout * 100
-
+        
         if len(self.torrentSources) + len(self.embedSources) + len(self.cloud_files) + len(self.local_files) == 0:
             self.return_data = []
         else:
@@ -144,7 +147,7 @@ class Sources(GetSources):
         self.torrentSources += all_sources['cached'] + all_sources['uncached']
         self.remainingProviders.remove('animetosho')
 
-#   ### embeds ###
+    ### embeds ###
     def hianime_worker(self, mal_id, episode, rescrape):
         hianime_sources = database.get_(hianime.Sources().get_sources, 8, mal_id, episode, key='hianime')
         self.embedSources += hianime_sources
@@ -161,9 +164,9 @@ class Sources(GetSources):
         self.embedSources += database.get_(gogoanime.Sources().get_sources, 8, mal_id, episode, get_backup, key='gogoanime')
         self.remainingProviders.remove('gogo')
 
-    def localfiles_worker(self, query, mal_id, episode, rescrape):
+    def user_local_inspection(self, query, mal_id, episode, rescrape):
         self.local_files += localfiles.Sources().get_sources(query, mal_id, episode)
-        self.remainingProviders.remove('Local Files')
+        self.remainingProviders.remove('Local Inspection')
 
     def user_cloud_inspection(self, query, mal_id, episode):
         debrid = {}
@@ -179,7 +182,7 @@ class Sources(GetSources):
     @staticmethod
     def sortSources(torrent_list, embed_list, cloud_files, other_list):
         all_list = torrent_list + embed_list + cloud_files + other_list
-        sortedList = [x for x in all_list if x['quality'] <= int(control.getSetting('general.maxResolution'))]
+        sortedList = [x for x in all_list if control.getInt('general.minResolution') <= x['quality'] <= control.getInt('general.maxResolution')]
 
         # Filter out sources
         if control.getSetting('general.disable265') == 'true':
@@ -200,16 +203,18 @@ class Sources(GetSources):
 
     def updateProgress(self):
         self.torrents_qual_len = [
-            len([i for i in self.torrentSources if i['quality'] == '4K']),
-            len([i for i in self.torrentSources if i['quality'] == '1080p']),
-            len([i for i in self.torrentSources if i['quality'] == '720p']),
-            len([i for i in self.torrentSources if i['quality'] == '480p'])
+            len([i for i in self.torrentSources if i['quality'] == 4]),
+            len([i for i in self.torrentSources if i['quality'] == 3]),
+            len([i for i in self.torrentSources if i['quality'] == 2]),
+            len([i for i in self.torrentSources if i['quality'] == 1]),
+            len([i for i in self.torrentSources if i['quality'] == 0])
         ]
 
         self.embeds_qual_len = [
-            len([i for i in self.embedSources if i['quality'] == '4K']),
-            len([i for i in self.embedSources if i['quality'] == '1080p']),
-            len([i for i in self.embedSources if i['quality'] == '720p']),
-            len([i for i in self.embedSources if i['quality'] == 'EQ'])
+            len([i for i in self.embedSources if i['quality'] == 4]),
+            len([i for i in self.embedSources if i['quality'] == 3]),
+            len([i for i in self.embedSources if i['quality'] == 2]),
+            len([i for i in self.embedSources if i['quality'] == 1]),
+            len([i for i in self.embedSources if i['quality'] == 0])
         ]
 

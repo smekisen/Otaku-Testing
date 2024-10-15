@@ -250,14 +250,20 @@ msgid "Import/Export"
 msgstr ""
 
 msgctxt "#30328"
-msgid "Import/Export settings.xml"
+msgid "Import Settings"
 msgstr ""
 
 msgctxt "#30329"
+msgid "Export Settings"
+msgstr ""
+
+msgctxt "#30330"
 msgid "Meta API"
 msgstr ""
 
-######30-31###
+msgctxt "#30331"
+msgid ""
+msgstr ""
 
 msgctxt "#30332"
 msgid "Torrents"
@@ -276,7 +282,7 @@ msgid "EQ"
 msgstr ""
 
 msgctxt "#30341"
-msgid "480p"
+msgid "SD"
 msgstr ""
 
 msgctxt "#30342"
@@ -682,6 +688,10 @@ msgctxt "#30410"
 msgid "Scrape Local Files"
 msgstr ""
 
+msgctxt "#30411"
+msgid "H!Anime Proxies (Region Problem)"
+msgstr ""
+
 ######Context & Widgets#####
 msgctxt "#30500"
 msgid "Context Customization"
@@ -873,4 +883,8 @@ msgstr ""
 
 msgctxt "#30547"
 msgid "Search Filter"
+msgstr ""
+
+msgctxt "#30548"
+msgid "Min Resolution"
 msgstr ""

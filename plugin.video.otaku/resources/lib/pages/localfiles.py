@@ -26,20 +26,20 @@ class Sources(BrowserBase):
             if episode not in clean_filenames[i]:
                 continue
             match_files.append(filenames[i])
-        mapfunc = partial(self.process_offline_search, episode=episode)
+        mapfunc = partial(self.process_local_search, episode=episode)
         all_results = list(map(mapfunc, match_files))
         return all_results
 
     @staticmethod
-    def process_offline_search(f, episode):
+    def process_local_search(f, episode):
         full_path = os.path.join(PATH, f)
         source = {
             'release_title': os.path.basename(f),
             'hash': os.path.join(PATH, f),
-            'type': 'local_files',
+            'provider': 'Local',
+            'type': 'local',
             'quality': source_utils.getQuality(f),
-            'debrid_provider': PATH,
-            'provider': 'local_files',
+            'debrid_provider': 'local_debrid',
             'episode_re': episode,
             'size': source_utils.get_size(os.path.getsize(full_path)),
             'byte_size': os.path.getsize(full_path),

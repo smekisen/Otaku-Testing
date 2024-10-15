@@ -437,6 +437,7 @@ class SettingIDs:
         self.filler = getBool('jz.filler')
         self.clean_titles = getBool('interface.cleantitles')
         self.terminateoncloud = getBool('general.terminate.oncloud')
+        self.terminateonlocal = getBool('general.terminate.onlocal')
         self.div_flavor = getBool("divflavors.bool")
         self.watchlist_data = getBool('interface.watchlist.data')
         self.fanart_select = getBool('context.otaku.fanartselect')
