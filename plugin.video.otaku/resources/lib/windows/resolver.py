@@ -59,17 +59,57 @@ class Resolver(BaseWindow):
         self.context = actionArgs.get('context')
         self.silent = actionArgs.get('silent')
 
+        if self.source_select:
+            control.setSetting('last_played_source', None)
+
     def onInit(self):
         self.resolve(self.sources)
 
     def resolve(self, sources):
         # last played source move to top of list
         if len(sources) > 1 and not self.source_select:
-            last_played = control.getSetting('last_played')
+            last_played = control.getSetting('last_played_source')
+            episode_value = str(self.episode)
+            episode_value_length = len(episode_value)  # Get the length of episode_value
             for index, source in enumerate(sources):
-                if str(source['release_title']) == last_played:
+                if source['type'] in ['embed', 'direct'] and str(source['provider']) + " ".join(map(str, source['info'])) == last_played:
                     sources.insert(0, sources.pop(index))
                     break
+                elif source['type'] in ['torrent', 'cloud', 'hoster', 'local']:
+                    release_title = str(source['release_title'])
+                    chars = list(last_played)
+                    match_found = False
+
+                    i = 0
+                    while i < len(chars):
+                        if chars[i].isdigit():
+                            # Check if there's enough room to replace episode_value_length digits
+                            if i + episode_value_length <= len(chars) and all(c.isdigit() for c in chars[i:i + episode_value_length]):
+                                # Replace the next episode_value_length digits with episode_value
+                                for j in range(episode_value_length):
+                                    chars[i + j] = episode_value[j]
+                                modified_last_played = ''.join(chars)
+
+                                if modified_last_played == release_title:
+                                    sources.insert(0, sources.pop(index))
+                                    match_found = True
+                                    break  # Found a match, no need to continue
+
+                                # Reset the modified characters if not a match
+                                for j in range(episode_value_length):
+                                    chars[i + j] = last_played[i + j]
+
+                            i += episode_value_length  # Move past the digits just checked or replaced
+                        else:
+                            i += 1  # Move to the next character if the current one is not a digit
+
+                        if match_found:
+                            break
+
+                        if not match_found:
+                            if str(source['release_title']) == last_played:
+                                sources.insert(0, sources.pop(index))
+                                break
 
         # Begin resolving links
         for i in sources:
@@ -267,7 +307,12 @@ This source is not cached would you like to cache it now?
                 self.resolve(sources)
             else:
                 super(Resolver, self).doModal()
-            control.setSetting('last_played', self.sources[0]['release_title'])
+            
+            if self.sources[0]['type'] == 'embed':
+                control.setSetting('last_played_source', str(self.sources[0]['provider']) + " ".join(map(str, self.sources[0]['info'])))
+            else:
+                control.setSetting('last_played_source', str(self.sources[0]['release_title']))
+            
         return self.return_data
 
     def onAction(self, action):

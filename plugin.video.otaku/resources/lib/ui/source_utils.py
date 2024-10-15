@@ -77,7 +77,7 @@ def getInfo(release_title):
         info.append('WMA')
     if any(i in release_title for i in ['dub', 'dubbed']):
         info.append('DUB')
-    if any(i in release_title for i in ['dual audio']):
+    if any(i in release_title for i in ['dual-audio', 'dual audio']):
         info.append('DUAL-AUDIO')
 
     # info.channels
@@ -113,6 +113,11 @@ def getInfo(release_title):
         info.append('BLUR')
     if any(i in release_title for i in [' 3d']):
         info.append('3D')
+
+    # info.batch
+    if any(i in release_title for i in [' batch']):
+        info.append('BATCH')
+
     return info
 
 

@@ -800,6 +800,11 @@
                     <default>false</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="general.disablebatch" type="boolean" label="30549" help="">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
                 <setting id="general.source" type="integer" label="30362" help="">
                     <level>0</level>
                     <default>1</default>

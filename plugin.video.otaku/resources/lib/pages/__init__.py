@@ -187,6 +187,8 @@ class Sources(GetSources):
         # Filter out sources
         if control.getSetting('general.disable265') == 'true':
             sortedList = [i for i in sortedList if 'HEVC' not in i['info']]
+        if control.getSetting('general.disablebatch') == 'true':
+            sortedList = [i for i in sortedList if 'BATCH' not in i['info']]
         lang = int(control.getSetting("general.source"))
         if lang != 1:
             langs = [0, 1, 2]

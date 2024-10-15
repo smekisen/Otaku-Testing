@@ -486,7 +486,7 @@ msgid "Set Delay in Seconds Before Showing Dialog"
 msgstr ""
 
 msgctxt "#30392"
-msgid "Timeout for finding Sources (seconds)"
+msgid "Timeout for Source Scraping (seconds)"
 msgstr ""
 
 msgctxt "#30393"
@@ -887,4 +887,8 @@ msgstr ""
 
 msgctxt "#30548"
 msgid "Min Resolution"
+msgstr ""
+
+msgctxt "#30549"
+msgid "Hide BATCH Items"
 msgstr ""
