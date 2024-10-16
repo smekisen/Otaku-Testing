@@ -12,17 +12,20 @@ class AnilistSyncDatabase:
     def __init__(self):
         self.activites = None
 
+        self.build_sync_activities()
+        self.build_show_table()
+        self.build_showmeta_table()
+        self.build_episode_table()
+        self.build_show_data_table()
+
         # If you make changes to the required meta in any indexer that is cached in this database
         # You will need to update the below version number to match the new addon version
         # This will ensure that the metadata required for operations is available
         # You may also update this version number to force a rebuild of the database after updating Otaku
         self.last_meta_update = '1.0.0'
         threading.Lock().acquire()
-        if self.activites is None:
-            self.re_build_database(True)
-        else:
-            self.refresh_activites()
-            self.check_database_version()
+        self.refresh_activites()
+        self.check_database_version()
 
     def refresh_activites(self):
         cursor = self.get_cursor()
@@ -37,7 +40,7 @@ class AnilistSyncDatabase:
         cursor.close()
 
     def check_database_version(self):
-        if self.activites.get('otaku_version') != self.last_meta_update:
+        if not self.activites or self.activites.get('otaku_version') != self.last_meta_update:
             self.re_build_database(True)
 
     def build_show_table(self):

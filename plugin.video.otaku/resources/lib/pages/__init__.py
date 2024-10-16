@@ -118,8 +118,9 @@ class Sources(GetSources):
                     control.colorstr(self.torrents_qual_len[4] + self.embeds_qual_len[4])
                 ))
             xbmc.sleep(500)
+            control.print(runtime)
         
-            if (self.canceled or 
+            if (self.canceled or len(self.remainingProviders) < 1 and runtime > 5 or
                 (control.settingids.terminateoncloud and len(self.cloud_files) > 0) or 
                 (control.settingids.terminateonlocal and len(self.local_files) > 0)):
                 break
@@ -180,8 +181,8 @@ class Sources(GetSources):
         self.remainingProviders.remove('Cloud Inspection')
 
     @staticmethod
-    def sortSources(torrent_list, embed_list, cloud_files, other_list):
-        all_list = torrent_list + embed_list + cloud_files + other_list
+    def sortSources(torrent_list, embed_list, cloud_files, local_files):
+        all_list = torrent_list + embed_list + cloud_files + local_files
         sortedList = [x for x in all_list if control.getInt('general.minResolution') <= x['quality'] <= control.getInt('general.maxResolution')]
 
         # Filter out sources

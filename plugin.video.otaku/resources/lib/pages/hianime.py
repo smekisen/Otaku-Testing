@@ -171,17 +171,16 @@ class Sources(BrowserBase):
         js = requests.get(self.js_file).text
         cases = re.findall(r'switch\(\w+\){([^}]+?)partKey', js)[0]
         vars_ = re.findall(r"\w+=(\w+)", cases)
-        consts = re.findall(r"([,;\s]\w+=0x\w{1,2}{%s,})" % len(vars_), js)[0]
+        consts = re.findall(r"((?:[,;\s]\w+=0x\w{1,2}){%s,})" % len(vars_), js)[0]
         indexes = []
         for var in vars_:
             var_value = re.search(r',{0}=(\w+)'.format(var), consts)
             if var_value:
                 indexes.append(to_int(var_value.group(1)))
-
         return chunked(indexes, 2)
 
     def _process_link(self, sources):
-        keyhints = database.get_(self.get_keyhints, 1)
+        keyhints = database.get_(self.get_keyhints, 24)
         try:
             key = ''
             orig_src = sources

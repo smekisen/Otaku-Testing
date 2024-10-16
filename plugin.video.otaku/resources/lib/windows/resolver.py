@@ -37,7 +37,6 @@ class Resolver(BaseWindow):
         self.return_data = {
             'link': None,
             'linkinfo': None,
-            'sub': None,
             'source': None
         }
         self.canceled = False
@@ -163,7 +162,8 @@ class Resolver(BaseWindow):
                 stream_link = i['hash']
                 self.return_data = {
                     'url': stream_link,
-                    'local': True
+                    'local': True,
+                    'headers': {}
                 }
                 break
 
@@ -179,7 +179,7 @@ class Resolver(BaseWindow):
                 self.source_select_close()
             linkInfo = self.return_data['linkinfo']
             item = xbmcgui.ListItem(path=linkInfo['url'], offscreen=True)
-            if self.return_data['sub']:
+            if self.return_data.get('sub'):
                 from resources.lib.ui import embed_extractor
                 embed_extractor.del_subs()
                 subtitles = []
