@@ -374,7 +374,7 @@
                         </dependency>
                     </dependencies>
                 </setting>
-                                <setting id="jz.dub" type="boolean" label="30320" help="">
+                <setting id="jz.dub" type="boolean" label="30320" help="">
                     <level>3</level>
                     <default>true</default>
                     <control type="toggle"/>
@@ -390,7 +390,6 @@
                     </constraints>
                     <control type="spinner" format="string" />
                 </setting>
-                <!--		<setting id="jz.sub" label="Show Sub Release Dates" type="bool" default="true" />-->
                 <setting id="jz.filler" type="boolean" label="30322" help="">
                     <level>3</level>
                     <default>false</default>
@@ -629,8 +628,77 @@
                 </setting>
             </group>
 
+            <!-- Media Playback -->
+            <group id="2" label="30530" help="">
+                <setting id="general.kodi_language" type="boolean" label="30550" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="general.audio" type="integer" label="30551" help="">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<options>
+							<option label="Japanese">0</option>
+							<option label="English">1</option>
+						</options>
+					</constraints>
+					<dependencies>
+						<dependency type="enable">
+							<condition operator="is" setting="general.kodi_language">false</condition>
+						</dependency>
+					</dependencies>
+					<control type="spinner" format="string"/>
+				</setting>
+				<setting id="general.subtitles" type="integer" label="30552" help="">
+					<level>0</level>
+					<default>1</default>
+					<constraints>
+						<options>
+							<option label="None">0</option>
+							<option label="English">1</option>
+							<option label="Japanese">2</option>
+							<option label="Spanish">3</option>
+							<option label="French">4</option>
+							<option label="German">5</option>
+							<option label="Italian">6</option>
+							<option label="Dutch">7</option>
+							<option label="Russian">8</option>
+							<option label="Portuguese">9</option>
+							<option label="Korean">10</option>
+							<option label="Chinese">11</option>
+							<option label="Arabic">12</option>
+							<option label="Hindi">13</option>
+							<option label="Turkish">14</option>
+							<option label="Polish">15</option>
+							<option label="Swedish">16</option>
+							<option label="Norwegian">17</option>
+							<option label="Danish">18</option>
+							<option label="Finnish">19</option>
+						</options>
+					</constraints>
+					<dependencies>
+						<dependency type="enable">
+							<condition operator="is" setting="general.kodi_language">false</condition>
+						</dependency>
+					</dependencies>
+					<control type="spinner" format="string"/>
+				</setting>
+                <setting id="general.dubsubtitles" type="boolean" label="30553" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+					<dependencies>
+						<dependency type="enable">
+							<condition operator="is" setting="general.kodi_language">false</condition>
+						</dependency>
+					</dependencies>
+				</setting>
+            </group>
+
             <!-- Skip Intro Dialog -->
-            <group id="2" label="30355" help="">
+            <group id="3" label="30355" help="">
                 <setting id="smartplay.skipintrodialog" type="boolean" label="30356" help="">
                     <level>0</level>
                     <default>true</default>
@@ -712,7 +780,7 @@
             </group>
 
             <!-- Playing Next Dialog -->
-            <group id="3" label="30352" help="">
+            <group id="4" label="30352" help="">
                 <setting id="smartplay.playingnextdialog" type="boolean" label="30353" help="">
                     <level>0</level>
                     <default>true</default>
@@ -803,8 +871,298 @@
                 <setting id="general.disablebatch" type="boolean" label="30549" help="">
                     <level>0</level>
                     <default>false</default>
+                    <dependencies>
+						<dependency type="enable">
+							<condition operator="is" setting="general.fileFilter">0</condition>
+						</dependency>
+					</dependencies>
                     <control type="toggle"/>
                 </setting>
+				<setting id="general.fileFilter" type="integer" label="30554" help="">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<options>
+							<option label="30560">0</option>
+							<option label="30561">1</option>
+							<option label="30562">2</option>
+						</options>
+					</constraints>
+					<control type="spinner" format="string"/>
+				</setting>
+				<setting id="general.webspeed" type="integer" label="30555" help="" parent="general.fileFilter">
+					<level>0</level>
+					<default>20</default>
+					<dependencies>
+						<dependency type="visible">
+							<condition operator="is" setting="general.fileFilter">1</condition>
+						</dependency>
+					</dependencies>
+					<control type="edit" format="integer">
+						<heading>40490</heading>
+					</control>
+				</setting>
+				<setting id="general.movie.maxGB" type="integer" label="30556" help="" parent="general.fileFilter">
+					<level>0</level>
+					<default>10</default>
+					<constraints>
+						<minimum>0</minimum>
+						<maximum>300</maximum>
+					</constraints>
+					<dependencies>
+						<dependency type="visible">
+							<condition operator="is" setting="general.fileFilter">2</condition>
+						</dependency>
+					</dependencies>
+					<control type="slider" format="integer">
+						<popup>false</popup>
+					</control>
+				</setting>
+				<setting id="general.movie.minGB" type="number" label="30557" help="" parent="general.fileFilter">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<minimum>0</minimum>
+						<step>0.1</step>
+						<maximum>30</maximum>
+					</constraints>
+					<dependencies>
+						<dependency type="visible">
+							<condition operator="is" setting="general.fileFilter">2</condition>
+						</dependency>
+					</dependencies>
+					<control type="slider" format="number">
+						<popup>false</popup>
+					</control>
+				</setting>
+				<setting id="general.episode.maxGB" type="integer" label="30558" help="" parent="general.fileFilter">
+					<level>0</level>
+					<default>10</default>
+					<constraints>
+						<minimum>0</minimum>
+						<maximum>300</maximum>
+					</constraints>
+					<dependencies>
+						<dependency type="visible">
+							<condition operator="is" setting="general.fileFilter">2</condition>
+						</dependency>
+					</dependencies>
+					<control type="slider" format="integer">
+						<popup>false</popup>
+					</control>
+				</setting>
+				<setting id="general.episode.minGB" type="number" label="30559" help="" parent="general.fileFilter">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<minimum>0</minimum>
+						<step>0.1</step>
+						<maximum>30</maximum>
+					</constraints>
+					<dependencies>
+						<dependency type="visible">
+							<condition operator="is" setting="general.fileFilter">2</condition>
+						</dependency>
+					</dependencies>
+					<control type="slider" format="number">
+						<popup>false</popup>
+					</control>
+				</setting>
+				<setting id="general.release_title_filter.enabled" type="boolean" label="30563" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="general.release_title_filter.selection" type="integer" label="30564" help="" parent="general.release_title_filter.enabled">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<options>
+							<option label="30565">0</option>
+							<option label="30566">1</option>
+							<option label="30567">2</option>
+							<option label="30568">3</option>
+							<option label="30569">4</option>
+						</options>
+					</constraints>
+					<dependencies>
+						<dependency type="visible">
+							<condition operator="is" setting="general.release_title_filter.enabled">true</condition>
+						</dependency>
+					</dependencies>
+					<control type="spinner" format="string"/>
+				</setting>
+				<setting id="general.release_title_filter.logic" type="integer" label="30570" help="" parent="general.release_title_filter.enabled">
+					<level>0</level>
+					<default>0</default>
+					<constraints>
+						<options>
+							<option label="30571">0</option>
+							<option label="30572">1</option>
+						</options>
+					</constraints>
+					<dependencies>
+						<dependency type="visible">
+							<condition operator="is" setting="general.release_title_filter.enabled">true</condition>
+						</dependency>
+					</dependencies>
+					<control type="spinner" format="string"/>
+				</setting>
+				<setting id="general.release_title_filter.value1" type="string" label="30565" help="" parent="general.release_title_filter.enabled">
+					<level>0</level>
+					<default/>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<dependencies>
+						<dependency type="visible">
+							<and>
+								<condition operator="is" setting="general.release_title_filter.selection">0</condition>
+								<condition operator="is" setting="general.release_title_filter.enabled">true</condition>
+							</and>
+						</dependency>
+					</dependencies>
+					<control type="edit" format="string">
+						<heading>30565</heading>
+					</control>
+				</setting>
+				<setting id="general.release_title_filter.value2" type="string" label="30566" help="" parent="general.release_title_filter.enabled">
+					<level>0</level>
+					<default/>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<dependencies>
+						<dependency type="visible">
+							<and>
+								<condition operator="is" setting="general.release_title_filter.selection">1</condition>
+								<condition operator="is" setting="general.release_title_filter.enabled">true</condition>
+							</and>
+						</dependency>
+					</dependencies>
+					<control type="edit" format="string">
+						<heading>30566</heading>
+					</control>
+				</setting>
+				<setting id="general.release_title_filter.value3" type="string" label="30567" help="" parent="general.release_title_filter.enabled">
+					<level>0</level>
+					<default/>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<dependencies>
+						<dependency type="visible">
+							<and>
+								<condition operator="is" setting="general.release_title_filter.selection">2</condition>
+								<condition operator="is" setting="general.release_title_filter.enabled">true</condition>
+							</and>
+						</dependency>
+					</dependencies>
+					<control type="edit" format="string">
+						<heading>30567</heading>
+					</control>
+				</setting>
+				<setting id="general.release_title_filter.value4" type="string" label="30568" help="" parent="general.release_title_filter.enabled">
+					<level>0</level>
+					<default/>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<dependencies>
+						<dependency type="visible">
+							<and>
+								<condition operator="is" setting="general.release_title_filter.selection">3</condition>
+								<condition operator="is" setting="general.release_title_filter.enabled">true</condition>
+							</and>
+						</dependency>
+					</dependencies>
+					<control type="edit" format="string">
+						<heading>30568</heading>
+					</control>
+				</setting>
+				<setting id="general.release_title_filter.value5" type="string" label="30569" help="" parent="general.release_title_filter.enabled">
+					<level>0</level>
+					<default/>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<dependencies>
+						<dependency type="visible">
+							<and>
+								<condition operator="is" setting="general.release_title_filter.selection">4</condition>
+								<condition operator="is" setting="general.release_title_filter.enabled">true</condition>
+							</and>
+						</dependency>
+					</dependencies>
+					<control type="edit" format="string">
+						<heading>30569</heading>
+					</control>
+				</setting>
+				<setting id="general.release_title_filter.exclude1" type="boolean" label="30573" help="" parent="general.release_title_filter.enabled">
+					<level>0</level>
+					<default>false</default>
+					<dependencies>
+						<dependency type="visible">
+							<and>
+								<condition operator="is" setting="general.release_title_filter.selection">0</condition>
+								<condition operator="is" setting="general.release_title_filter.enabled">true</condition>
+							</and>
+						</dependency>
+					</dependencies>
+					<control type="toggle"/>
+				</setting>
+				<setting id="general.release_title_filter.exclude2" type="boolean" label="30573" help="" parent="general.release_title_filter.enabled">
+					<level>0</level>
+					<default>false</default>
+					<dependencies>
+						<dependency type="visible">
+							<and>
+								<condition operator="is" setting="general.release_title_filter.selection">1</condition>
+								<condition operator="is" setting="general.release_title_filter.enabled">true</condition>
+							</and>
+						</dependency>
+					</dependencies>
+					<control type="toggle"/>
+				</setting>
+				<setting id="general.release_title_filter.exclude3" type="boolean" label="30573" help="" parent="general.release_title_filter.enabled">
+					<level>0</level>
+					<default>false</default>
+					<dependencies>
+						<dependency type="visible">
+							<and>
+								<condition operator="is" setting="general.release_title_filter.selection">2</condition>
+								<condition operator="is" setting="general.release_title_filter.enabled">true</condition>
+							</and>
+						</dependency>
+					</dependencies>
+					<control type="toggle"/>
+				</setting>
+				<setting id="general.release_title_filter.exclude4" type="boolean" label="30573" help="" parent="general.release_title_filter.enabled">
+					<level>0</level>
+					<default>false</default>
+					<dependencies>
+						<dependency type="visible">
+							<and>
+								<condition operator="is" setting="general.release_title_filter.selection">3</condition>
+								<condition operator="is" setting="general.release_title_filter.enabled">true</condition>
+							</and>
+						</dependency>
+					</dependencies>
+					<control type="toggle"/>
+				</setting>
+				<setting id="general.release_title_filter.exclude5" type="boolean" label="30573" help="" parent="general.release_title_filter.enabled">
+					<level>0</level>
+					<default>false</default>
+					<dependencies>
+						<dependency type="visible">
+							<and>
+								<condition operator="is" setting="general.release_title_filter.selection">4</condition>
+								<condition operator="is" setting="general.release_title_filter.enabled">true</condition>
+							</and>
+						</dependency>
+					</dependencies>
+					<control type="toggle"/>
+				</setting>
                 <setting id="general.source" type="integer" label="30362" help="">
                     <level>0</level>
                     <default>1</default>

@@ -692,6 +692,11 @@ class AniListBrowser:
         except TypeError:
             start_date = None
 
+        try:
+            duration = res['duration'] * 60 
+        except (KeyError, TypeError):
+            duration = 0
+
         title_userPreferred = res['title'][self._TITLE_LANG] or res['title']['romaji']
 
         name = res['title']['romaji']
@@ -715,7 +720,8 @@ class AniListBrowser:
             'poster': res['coverImage']['extraLarge'],
             'status': res.get('status'),
             'format': res.get('format', ''),
-            'plot': desc
+            'plot': desc,
+            'duration': duration
         }
 
         try:

@@ -103,11 +103,13 @@ def get_sources(mal_id, episode, media_type, rescrape=False, source_select=False
         'mal_id': mal_id,
         'episode': episode,
         'status': kodi_meta['status'],
+        'duration': kodi_meta['duration'],
         'media_type': media_type,
         'rescrape': rescrape,
         'get_backup': get_backup,
         'source_select': source_select,
         'silent': silent
     }
+    
     sources = pages.getSourcesHelper(actionArgs)
     return sources

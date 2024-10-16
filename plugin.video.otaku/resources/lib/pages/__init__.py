@@ -43,6 +43,7 @@ class Sources(GetSources):
         episode = args['episode']
         status = args['status']
         media_type = args['media_type']
+        duration = args['duration']
         rescrape = args['rescrape']
         # source_select = args['source_select']
         get_backup = args['get_backup']
@@ -118,19 +119,19 @@ class Sources(GetSources):
                     control.colorstr(self.torrents_qual_len[4] + self.embeds_qual_len[4])
                 ))
             xbmc.sleep(500)
-            control.print(runtime)
         
-            if (self.canceled or len(self.remainingProviders) < 1 and runtime > 5 or
+            if (self.canceled or len(self.remainingProviders) < 1 and runtime > 7 or
                 (control.settingids.terminateoncloud and len(self.cloud_files) > 0) or 
                 (control.settingids.terminateonlocal and len(self.local_files) > 0)):
                 break
+
             runtime = time.perf_counter() - start_time
             self.progress = runtime / timeout * 100
         
         if len(self.torrentSources) + len(self.embedSources) + len(self.cloud_files) + len(self.local_files) == 0:
             self.return_data = []
         else:
-            self.return_data = self.sortSources(self.torrentSources, self.embedSources, self.cloud_files, self.local_files)
+            self.return_data = self.sortSources(self.torrentSources, self.embedSources, self.cloud_files, self.local_files, media_type, duration)
         self.close()
         return self.return_data
 
@@ -181,9 +182,84 @@ class Sources(GetSources):
         self.remainingProviders.remove('Cloud Inspection')
 
     @staticmethod
-    def sortSources(torrent_list, embed_list, cloud_files, local_files):
+    def sortSources(torrent_list, embed_list, cloud_files, local_files, media_type, duration):
         all_list = torrent_list + embed_list + cloud_files + local_files
         sortedList = [x for x in all_list if control.getInt('general.minResolution') <= x['quality'] <= control.getInt('general.maxResolution')]
+    
+        # Filter by size
+        filter_option = control.getSetting('general.fileFilter')
+    
+        if filter_option == '1':
+            # web speed limit
+            webspeed = int(control.getSetting('general.webspeed'))
+            len_in_sec = int(duration) * 60
+    
+            _torrent_list = torrent_list
+            torrent_list = [i for i in _torrent_list if i['size'] != 'NA' and ((float(i['size'][:-3]) * 8000) / len_in_sec) <= webspeed]
+    
+        elif filter_option == '2':
+            # hard limit
+            _torrent_list = torrent_list
+    
+            if media_type == 'movie':
+                max_GB = float(control.getSetting('general.movie.maxGB'))
+                min_GB = float(control.getSetting('general.movie.minGB'))
+            else:
+                max_GB = float(control.getSetting('general.episode.maxGB'))
+                min_GB = float(control.getSetting('general.episode.minGB'))
+    
+            torrent_list = []
+            for i in _torrent_list:
+                if i['size'] != 'NA':
+                    size = float(i['size'][:-3])
+                    unit = i['size'][-2:].strip()
+    
+                    if unit == 'MB':
+                        size /= 1024  # convert MB to GB for comparison
+    
+                    if min_GB <= size <= max_GB:
+                        torrent_list.append(i)
+
+        # Filter by release title
+        if control.getSetting('general.release_title_filter.enabled') == 'true':
+            release_title_filter1 = control.getSetting('general.release_title_filter.value1')
+            release_title_filter2 = control.getSetting('general.release_title_filter.value2')
+            release_title_filter3 = control.getSetting('general.release_title_filter.value3')
+            release_title_filter4 = control.getSetting('general.release_title_filter.value4')
+            release_title_filter5 = control.getSetting('general.release_title_filter.value5')
+
+            # Get the new settings
+            exclude_filter1 = control.getSetting('general.release_title_filter.exclude1') == 'true'
+            exclude_filter2 = control.getSetting('general.release_title_filter.exclude2') == 'true'
+            exclude_filter3 = control.getSetting('general.release_title_filter.exclude3') == 'true'
+            exclude_filter4 = control.getSetting('general.release_title_filter.exclude4') == 'true'
+            exclude_filter5 = control.getSetting('general.release_title_filter.exclude5') == 'true'
+
+            _torrent_list = torrent_list
+            release_title_logic = control.getSetting('general.release_title_filter.logic')
+            if release_title_logic == '0':
+                # AND filter
+                torrent_list = [
+                    i for i in _torrent_list
+                    if (not exclude_filter1 or release_title_filter1 not in i['release_title'])
+                    and (not exclude_filter2 or release_title_filter2 not in i['release_title'])
+                    and (not exclude_filter3 or release_title_filter3 not in i['release_title'])
+                    and (not exclude_filter4 or release_title_filter4 not in i['release_title'])
+                    and (not exclude_filter5 or release_title_filter5 not in i['release_title'])
+                ]
+            if release_title_logic == '1':
+                # OR filter
+                torrent_list = [
+                    i for i in _torrent_list
+                    if (release_title_filter1 != "" and (exclude_filter1 ^ (release_title_filter1 in i['release_title'])))
+                    or (release_title_filter2 != "" and (exclude_filter2 ^ (release_title_filter2 in i['release_title'])))
+                    or (release_title_filter3 != "" and (exclude_filter3 ^ (release_title_filter3 in i['release_title'])))
+                    or (release_title_filter4 != "" and (exclude_filter4 ^ (release_title_filter4 in i['release_title'])))
+                    or (release_title_filter5 != "" and (exclude_filter5 ^ (release_title_filter5 in i['release_title'])))
+                ]
+    
+        # Update sortedList to include the filtered torrent_list
+        sortedList = [x for x in sortedList if x in torrent_list or x in embed_list or x in cloud_files or x in local_files]
 
         # Filter out sources
         if control.getSetting('general.disable265') == 'true':

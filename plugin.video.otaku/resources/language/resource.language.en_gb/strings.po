@@ -814,7 +814,7 @@ msgid "Show Changelog every update"
 msgstr ""
 
 msgctxt "#30530"
-msgid ""
+msgid "Media Playback"
 msgstr ""
 
 msgctxt "#30531"
@@ -891,4 +891,100 @@ msgstr ""
 
 msgctxt "#30549"
 msgid "Hide BATCH Items"
+msgstr ""
+
+msgctxt "#30550"
+msgid "Use Kodi's Preferred Language Settings"
+msgstr ""
+
+msgctxt "#30551"
+msgid "Preferred Audio Playback"
+msgstr ""
+
+msgctxt "#30552"
+msgid "Preferred Subtitle Language"
+msgstr ""
+
+msgctxt "#30553"
+msgid "Enable Automatic Subtitles for Dub Streams"
+msgstr ""
+
+msgctxt "#30554"
+msgid "Source Filtering by Size"
+msgstr ""
+
+msgctxt "#30555"
+msgid "Internet Speed (Mbps)"
+msgstr ""
+
+msgctxt "#30556"
+msgid "Movie Max Size (GB)"
+msgstr ""
+
+msgctxt "#30557"
+msgid "Movie Min Size (GB)"
+msgstr ""
+
+msgctxt "#30558"
+msgid "Episode Max Size (GB)"
+msgstr ""
+
+msgctxt "#30559"
+msgid "Episode Min Size (GB)"
+msgstr ""
+
+msgctxt "#30560"
+msgid "Off"
+msgstr ""
+
+msgctxt "#30561"
+msgid "Internet Speed"
+msgstr ""
+
+msgctxt "#30562"
+msgid "Hard Limit"
+msgstr ""
+
+msgctxt "#30563"
+msgid "Source Filtering by Release Title"
+msgstr ""
+
+msgctxt "#30564"
+msgid "Filter Selection"
+msgstr ""
+
+msgctxt "#30565"
+msgid "Release Title Filter 1"
+msgstr ""
+
+msgctxt "#30566"
+msgid "Release Title Filter 2"
+msgstr ""
+
+msgctxt "#30567"
+msgid "Release Title Filter 3"
+msgstr ""
+
+msgctxt "#30568"
+msgid "Release Title Filter 4"
+msgstr ""
+
+msgctxt "#30569"
+msgid "Release Title Filter 5"
+msgstr ""
+
+msgctxt "#30570"
+msgid "Filter Logic for Multiple Filters"
+msgstr ""
+
+msgctxt "#30571"
+msgid "AND"
+msgstr ""
+
+msgctxt "#30572"
+msgid "OR"
+msgstr ""
+
+msgctxt "#30573"
+msgid "Exclude Keywords"
 msgstr ""

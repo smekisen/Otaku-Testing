@@ -327,7 +327,8 @@ class MalBrowser:
             'poster': res['images']['webp']['large_image_url'],
             'status': res.get('status'),
             'format': res.get('type'),
-            'plot': res.get('synopsis')
+            'plot': res.get('synopsis'),
+            'duration': self.duration_to_seconds(res.get('duration'))
         }
 
         if isinstance(res.get('score'), float):

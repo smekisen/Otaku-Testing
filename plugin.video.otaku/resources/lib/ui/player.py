@@ -1,5 +1,6 @@
 import xbmc
 import xbmcgui
+import service
 
 from resources.lib.ui import control
 from resources.lib.indexers import aniskip
@@ -81,6 +82,8 @@ class WatchlistPlayer(player):
             if watched_percentage > self.update_percent:
                 self._watchlist_update(self.mal_id, self.episode)
                 self.updated = True
+                if playList.size() == 0 or playList.getposition() == (playList.size() - 1):
+                    service.sync_watchlist(True)
                 break
             xbmc.sleep(5000)
 
@@ -102,6 +105,76 @@ class WatchlistPlayer(player):
         control.closeAllDialogs()
         if self.resume_time:
             player().seekTime(self.resume_time)
+
+        if control.getSetting('general.kodi_language') == 'false':
+            # Subtitle Preferences
+            subtitle_lang = self.getAvailableSubtitleStreams()
+            subtitles = [
+                "none", "eng", "jpn", "spa", "fre", "ger",
+                "ita", "dut", "rus", "por", "kor", "chi",
+                "ara", "hin", "tur", "pol", "swe", "nor",
+                "dan", "fin"
+            ]
+            preferred_subtitle_setting = int(control.getSetting('general.subtitles'))
+
+            if 0 <= preferred_subtitle_setting < len(subtitles):
+                preferred_subtitle = subtitles[preferred_subtitle_setting]
+            else:
+                preferred_subtitle = "eng"
+
+            try:
+                subtitle_int = subtitle_lang.index(preferred_subtitle)
+                self.setSubtitleStream(subtitle_int)
+            except ValueError:
+                subtitle_int = 0
+                self.setSubtitleStream(subtitle_int)
+
+            # Audio Preferences
+            audio_lang = self.getAvailableAudioStreams()
+            audios = ['jpn', 'eng']
+            preferred_audio_setting = int(control.getSetting('general.audio'))
+
+            if 0 <= preferred_audio_setting < len(audios):
+                preferred_audio = audios[preferred_audio_setting]
+
+            try:
+                audio_int = audio_lang.index(preferred_audio)
+                self.setAudioStream(audio_int)
+            except ValueError:
+                audio_int = 0
+                self.setAudioStream(audio_int)
+
+            if len(audio_lang) == 1:
+                if "jpn" not in audio_lang:
+                    if control.getSetting('general.dubsubtitles') == 'true':
+                        if preferred_subtitle == "none":
+                            self.showSubtitles(False)
+                        else:
+                            self.showSubtitles(True)
+                    else:
+                        self.showSubtitles(False)
+
+                if "eng" not in audio_lang:
+                    if preferred_subtitle == "none":
+                        self.showSubtitles(False)
+                    else:
+                        self.showSubtitles(True)
+
+            if len(audio_lang) > 1:
+                if preferred_audio == "eng":
+                    if control.getSetting('general.dubsubtitles') == 'true':
+                        if preferred_subtitle == "none":
+                            self.showSubtitles(False)
+                        else:
+                            self.showSubtitles(True)
+                    else:
+                        self.showSubtitles(False)
+
+                if preferred_audio == "jpn":
+                    if preferred_subtitle == "none":
+                        self.showSubtitles(False)
+                    else:
+                        self.showSubtitles(True)
 
         if self.media_type == 'movie':
             return self.onWatchedPercent()
