@@ -95,7 +95,9 @@ class JikanAPI:
         result_ep = self.get_episode_meta(mal_id)
         mapfunc = partial(self.parse_episode_view, mal_id=mal_id, season=season, poster=poster, fanart=fanart, eps_watched=eps_watched, update_time=update_time, tvshowtitle=tvshowtitle, dub_data=dub_data, filler_data=filler_data)
         all_results = sorted(list(map(mapfunc, result_ep)), key=lambda x: x['info']['episode'])
-        control.notify("Jikanmoa", f'{tvshowtitle} Added to Database', icon=poster)
+
+        if control.getBool('override.meta.api') and control.getBool('override.meta.notify'):
+            control.notify("Jikanmoa", f'{tvshowtitle} Added to Database', icon=poster)
         return all_results
 
     def append_episodes(self, mal_id, episodes, eps_watched, poster, fanart, tvshowtitle, filler_data=None, dub_data=None):

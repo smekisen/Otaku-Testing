@@ -85,7 +85,8 @@ class ANIZIPAPI:
         mapfunc = partial(self.parse_episode_view, mal_id=mal_id, season=season, poster=poster, fanart=fanart, eps_watched=eps_watched, update_time=update_time, tvshowtitle=tvshowtitle, dub_data=dub_data, filler_data=filler_data)
         all_results = list(map(mapfunc, result_ep))
 
-        control.notify("Anizip", f'{tvshowtitle} Added to Database', icon=poster)
+        if control.getBool('override.meta.api') and control.getBool('override.meta.notify'):
+            control.notify("Anizip", f'{tvshowtitle} Added to Database', icon=poster)
         return all_results
 
     def append_episodes(self, mal_id, episodes, eps_watched, poster, fanart, tvshowtitle, dub_data=None):

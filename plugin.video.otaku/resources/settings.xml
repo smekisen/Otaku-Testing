@@ -224,12 +224,12 @@
                     </constraints>
                     <control type="spinner" format="string"/>
                 </setting>
-                <setting id="overide.meta.api" type="boolean" label="30305" help="">
+                <setting id="override.meta.api" type="boolean" label="30305" help="">
                     <level>3</level>
                     <default>false</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="meta.api" type="string" label="30305" help="">
+                <setting id="meta.api" type="string" label="30305" help="" parent="override.meta.api">
                     <level>3</level>
                     <default>simkl</default>
                     <constraints>
@@ -241,7 +241,15 @@
                     </constraints>
                     <control type="spinner" format="string"/>
                     <dependencies>
-                        <dependency type="visible" setting="overide.meta.api">true</dependency>
+                        <dependency type="visible" setting="override.meta.api">true</dependency>
+                    </dependencies>
+                </setting>
+                <setting id="override.meta.notify" type="boolean" label="30575" help="" parent="override.meta.api">
+                    <level>3</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                    <dependencies>
+                        <dependency type="visible" setting="override.meta.api">true</dependency>
                     </dependencies>
                 </setting>
             </group>
@@ -453,13 +461,12 @@
 
             <!-- Miscellaneous -->
             <group id="6" label="30536">
-				<setting id="download_manager" type="action" label="30016" help="">
+				<setting id="download_manager_miscellaneous" type="action" label="30016" help="">
 					<level>0</level>
-					<data>RunPlugin(plugin://plugin.video.otaku/download_manager)</data>
-					<constraints>
-						<allowempty>true</allowempty>
-					</constraints>
-					<control type="button" format="action"/>
+                    <data>RunPlugin(plugin://plugin.video.otaku/download_manager?setting=true)</data>
+                    <control type="button" format="action">
+                        <close>true</close>
+                    </control>
 				</setting>
 				<setting id="download.location" type="path" label="30304" help="">
 					<level>0</level>
@@ -548,8 +555,17 @@
                 </setting>
             </group>
 
+            <!-- Torrent Scrapping -->
+            <group id="3" label="30574" help="">
+                <setting id="show.uncached" type="boolean" label="30364" help="">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+            </group>
+
             <!-- Cloud Scrapping -->
-            <group id="2" label="30541" help="">
+            <group id="4" label="30541" help="">
                 <setting id="rd.cloudInspection" type="boolean" label="30190" help="">
                     <level>0</level>
                     <default>false</default>
@@ -577,7 +593,7 @@
             </group>
 
             <!-- Local Scrapping -->
-            <group id="3" label="30542" help="">
+            <group id="5" label="30542" help="">
                 <setting id="provider.localfiles" type="boolean" label="30410" help="">
                     <level>0</level>
                     <default>true</default>
@@ -1163,6 +1179,17 @@
 					</dependencies>
 					<control type="toggle"/>
 				</setting>
+            </group>
+
+            <!-- Sort Sourcing -->
+            <group id="3" label="30363" help="">
+                <setting id="sort_select" type="action" label="30017" help="">
+                    <level>0</level>
+                    <data>RunPlugin(plugin://plugin.video.otaku/sort_select?setting=true)</data>
+                    <control type="button" format="action">
+                        <close>true</close>
+                    </control>
+                </setting>
                 <setting id="general.source" type="integer" label="30362" help="">
                     <level>0</level>
                     <default>1</default>
@@ -1175,26 +1202,10 @@
                     </constraints>
                     <control type="spinner" format="string" />
                 </setting>
-                <setting id="show.uncached" type="boolean" label="30364" help="">
-                    <level>0</level>
-                    <default>false</default>
-                    <control type="toggle"/>
-                </setting>
-            </group>
-
-            <!-- Sort Sourcing -->
-            <group id="2" label="30363" help="">
-                <setting id="sort_select" type="action" label="30017" help="">
-                    <level>0</level>
-                    <data>RunPlugin(plugin://plugin.video.otaku/sort_select?setting=true)</data>
-                    <control type="button" format="action">
-                        <close>true</close>
-                    </control>
-                </setting>
             </group>
 
              <!-- Search Filter -->
-            <group id="3" label="30547" help="">
+            <group id="4" label="30547" help="">
                 <setting id="search.adult" type="boolean" label="30383" help="">
                     <level>0</level>
                     <default>false</default>

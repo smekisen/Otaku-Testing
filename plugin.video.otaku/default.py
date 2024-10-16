@@ -59,6 +59,12 @@ def FIND_RELATIONS(payload, params):
     control.draw_items(BROWSER.get_relations(mal_id), 'tvshows')
 
 
+# @Route('watch_order/*')
+# def WATCH_ORDER(payload, params):
+#     path, mal_id, eps_watched = payload.rsplit("/")
+#     control.draw_items(BROWSER.get_watch_order(mal_id), 'tvshows')
+
+
 @Route('airing_anime/*')
 def ANILIST_AIRING_ANIME(payload, params):
     control.draw_items(BROWSER.get_airing_anime(int(payload)), 'tvshows')
@@ -340,8 +346,8 @@ def CLEAR_SELECTED_FANART(payload, params):
 
 @Route('rebuild_database')
 def REBUILD_DATABASE(payload, params):
-    from resources.lib.ui.database_sync import AnilistSyncDatabase
-    AnilistSyncDatabase().re_build_database()
+    from resources.lib.ui.database_sync import MalSyncDatabase
+    MalSyncDatabase().re_build_database()
     if params.get('setting'):
         control.exit_code()
 
@@ -358,6 +364,12 @@ def COMPLETED_SYNC(payload, params):
 def SORT_SELECT(payload, params):
     from resources.lib.windows.sort_select import SortSelect
     SortSelect(*('sort_select.xml', control.ADDON_PATH)).doModal()
+
+
+# @Route('filter_select')
+# def FILTER_SELECT(payload, params):
+#     from resources.lib.windows.filter_select import FilterSelect
+#     FilterSelect(*('filter_select.xml', control.ADDON_PATH)).doModal()
 
 
 @Route('download_manager')

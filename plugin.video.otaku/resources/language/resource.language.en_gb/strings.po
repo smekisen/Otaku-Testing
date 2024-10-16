@@ -374,7 +374,7 @@ msgid "Sort Sourcing"
 msgstr ""
 
 msgctxt "#30364"
-msgid "Show UnCached Sources"
+msgid "Scrape UnCached Sources"
 msgstr ""
 
 msgctxt "#30365"
@@ -987,4 +987,12 @@ msgstr ""
 
 msgctxt "#30573"
 msgid "Exclude Keywords"
+msgstr ""
+
+msgctxt "#30574"
+msgid "Torrent Scrapping"
+msgstr ""
+
+msgctxt "#30575"
+msgid "Notify When Anime is Added to Database"
 msgstr ""

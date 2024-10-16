@@ -8,7 +8,7 @@ database_path = control.malSyncDB
 sqlite_version = version
 
 
-class AnilistSyncDatabase:
+class MalSyncDatabase:
     def __init__(self):
         self.activites = None
 

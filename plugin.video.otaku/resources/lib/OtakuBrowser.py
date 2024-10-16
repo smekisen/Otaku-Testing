@@ -74,7 +74,7 @@ def get_anime_init(mal_id):
         if not show_meta:
             return [], 'episodes'
 
-    if control.getBool('overide.meta.api'):
+    if control.getBool('override.meta.api'):
         meta_api = control.getSetting('meta.api')
         if meta_api == 'simkl':
             data = simkl.SIMKLAPI().get_episodes(mal_id, show_meta)
