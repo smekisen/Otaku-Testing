@@ -1216,3 +1216,35 @@ msgstr ""
 msgctxt "#30580"
 msgid "Genres Menu"
 msgstr ""
+
+msgctxt "#30581"
+msgid "Set Content Status"
+msgstr ""
+
+msgctxt "#30582"
+msgid "Status"
+msgstr ""
+
+msgctxt "#30583"
+msgid "Airing"
+msgstr ""
+
+msgctxt "#30584"
+msgid "Complete"
+msgstr ""
+
+msgctxt "#30585"
+msgid "Upcoming"
+msgstr ""
+
+msgctxt "#30586"
+msgid "Finished"
+msgstr ""
+
+msgctxt "#30587"
+msgid "Not Yet Aired"
+msgstr ""
+
+msgctxt "#30588"
+msgid "Cancelled"
+msgstr ""
