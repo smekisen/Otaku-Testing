@@ -5,11 +5,17 @@ from resources.lib.ui import control
 
 def allocate_item(name, url, isfolder, isplayable, image='', info=None, fanart=None, poster=None, cast=None, landscape=None, banner=None, clearart=None, clearlogo=None):
     if image and '/' not in image:
-        image = os.path.join(control.OTAKU_ICONS_PATH, image)
+        genre_image = os.path.join(control.OTAKU_GENRE_PATH, image)
+        art_image = os.path.join(control.OTAKU_ICONS_PATH, image)
+        image = genre_image if os.path.exists(genre_image) else art_image
     if fanart and not isinstance(fanart, list) and '/' not in fanart:
-        fanart = os.path.join(control.OTAKU_ICONS_PATH, fanart)
+        genre_fanart = os.path.join(control.OTAKU_GENRE_PATH, fanart)
+        art_fanart = os.path.join(control.OTAKU_ICONS_PATH, fanart)
+        fanart = genre_fanart if os.path.exists(genre_fanart) else art_fanart
     if poster and '/' not in poster:
-        poster = os.path.join(control.OTAKU_ICONS_PATH, poster)
+        genre_poster = os.path.join(control.OTAKU_GENRE_PATH, poster)
+        art_poster = os.path.join(control.OTAKU_ICONS_PATH, poster)
+        poster = genre_poster if os.path.exists(genre_poster) else art_poster
     new_res = {
         'isfolder': isfolder,
         'isplayable': isplayable,

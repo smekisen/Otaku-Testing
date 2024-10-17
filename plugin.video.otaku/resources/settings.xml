@@ -1726,41 +1726,299 @@
             </group>
         </category>
 
-        <!-- Mainmenu Customization -->
-        <category id="Mainmenu Customization" label="30546" help="">
+        <!-- Menu Customization -->
+        <category id="Menu Customization" label="30546" help="">
             <!-- Main Menu Items -->
             <group id="1" label="30381" help="">
-                <setting id="menu.lastwatched" type="boolean" label="30000" help="">
+                <setting id="menu.lastwatched" type="boolean" label="30900" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                    <visible>false</visible>
+                </setting>
+                <setting id="airing_last_season/1" type="boolean" label="30901" help="">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="anilist_airing_anime" type="boolean" label="30001" help="">
+                <setting id="airing_this_season/1" type="boolean" label="30902" help="">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="anilist_upcoming_next_season" type="boolean" label="30002" help="">
+                <setting id="airing_next_season/1" type="boolean" label="30903" help="">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="anilist_top_100_anime" type="boolean" label="30003" help="">
+                <setting id="movies" type="boolean" label="30904" help="">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="anilist_genres" type="boolean" label="30004" help="">
+                <setting id="tv_shows" type="boolean" label="30905" help="">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="search_history" type="boolean" label="30005" help="">
+                <setting id="trending" type="boolean" label="30906" help="">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="tools" type="boolean" label="30006" help="">
+                <setting id="popular" type="boolean" label="30907" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="voted" type="boolean" label="30908" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="favourites" type="boolean" label="30909" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="top_100/1" type="boolean" label="30910" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genres" type="boolean" label="30911" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="search" type="boolean" label="30912" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                    <visible>false</visible>
+                </setting>
+                <setting id="tools" type="boolean" label="30913" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                    <visible>false</visible>
+                </setting>
+            </group>
+
+            <!-- Sub Menu - Trending Items -->
+            <group id="2" label="30576" help="">
+                <setting id="trending_last_year/1" type="boolean" label="30914" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="trending_this_year/1" type="boolean" label="30915" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="trending_last_season/1" type="boolean" label="30916" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="trending_this_season/1" type="boolean" label="30917" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="all_time_trending/1" type="boolean" label="30918" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+            </group>
+
+            <!-- Sub Menu - Popular -->
+            <group id="3" label="30577" help="">
+                <setting id="popular_last_year/1" type="boolean" label="30919" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="popular_this_year/1" type="boolean" label="30920" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="popular_last_season/1" type="boolean" label="30921" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="popular_this_season/1" type="boolean" label="30922" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="all_time_popular/1" type="boolean" label="30923" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+            </group>
+
+            <!-- Sub Menu - Voted -->
+            <group id="4" label="30578" help="">
+                <setting id="voted_last_year/1" type="boolean" label="30924" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="voted_this_year/1" type="boolean" label="30925" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="voted_last_season/1" type="boolean" label="30926" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="voted_this_season/1" type="boolean" label="30927" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="all_time_voted/1" type="boolean" label="30928" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+            </group>
+
+            <!-- Sub Menu - Favourites -->
+            <group id="5" label="30579" help="">
+                <setting id="favourites_last_year/1" type="boolean" label="30929" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="favourites_this_year/1" type="boolean" label="30930" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="favourites_last_season/1" type="boolean" label="30931" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="favourites_this_season/1" type="boolean" label="30932" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="all_time_favourites/1" type="boolean" label="30933" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+            </group>
+
+            <!-- Genres Menu -->
+            <group id="6" label="30580" help="">
+                <setting id="genres///1" type="boolean" label="30934" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_action/1" type="boolean" label="30935" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_adventure/1" type="boolean" label="30936" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_comedy/1" type="boolean" label="30937" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_drama/1" type="boolean" label="30938" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_ecchi/1" type="boolean" label="30939" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_fantasy/1" type="boolean" label="30940" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_hentai/1" type="boolean" label="30941" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_horror/1" type="boolean" label="30942" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_shoujo/1" type="boolean" label="30943" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_mecha/1" type="boolean" label="30944" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_music/1" type="boolean" label="30945" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_mystery/1" type="boolean" label="30946" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_psychological/1" type="boolean" label="30947" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_romance/1" type="boolean" label="30948" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_sci_fi/1" type="boolean" label="30949" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_slice_of_life/1" type="boolean" label="30950" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_sports/1" type="boolean" label="30951" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_supernatural/1" type="boolean" label="30952" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="genre_thriller/1" type="boolean" label="30953" help="">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>

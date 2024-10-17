@@ -33,23 +33,29 @@ class AniListBrowser:
         year = date.year
         month = date.month
         seasons = ['WINTER', 'SPRING', 'SUMMER', 'FALL']
+        
         if period == "next":
             season = seasons[int((month - 1) / 3 + 1) % 4]
             if season == 'WINTER':
                 year += 1
+        elif period == "last":
+            season = seasons[int((month - 1) / 3 - 1) % 4]
+            if season == 'FALL' and month <= 3:
+                year -= 1
         else:
             season = seasons[int((month - 1) / 3)]
+        
         return season, year
+    
 
-    def get_airing_anime(self, page):
-        season, year = self.get_season_year('Aired')
+    def get_airing_last_season(self, page):
+        season, year = self.get_season_year('last')
         variables = {
             'page': page,
             'perpage': self.perpage,
             'type': "ANIME",
             'season': season,
             'year': f'{year}%',
-            # 'status': "RELEASING",
             'sort': "TRENDING_DESC"
         }
 
@@ -59,10 +65,89 @@ class AniListBrowser:
             variables['countryOfOrigin'] = self.countryOfOrigin_type
 
         airing = database.get_(self.get_base_res, 24, variables)
-        return self.process_anilist_view(airing, "airing_anime/%d", page)
+        return self.process_anilist_view(airing, "airing_last_season/%d", page)
+    
 
-    def get_upcoming_next_season(self, page):
+    def get_airing_this_season(self, page):
+        season, year = self.get_season_year('this')
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'season': season,
+            'year': f'{year}%',
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        airing = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(airing, "airing_this_season/%d", page)
+
+
+    def get_airing_next_season(self, page):
         season, year = self.get_season_year('next')
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'season': season,
+            'year': f'{year}%',
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        airing = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(airing, "airing_next_season/%d", page)
+    
+
+    def get_trending_last_year(self, page):
+        season, year = self.get_season_year('')
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'year': f'{year - 1}%',
+            'sort': "TRENDING_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        trending = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(trending, "trending_last_year/%d", page)
+
+
+    def get_trending_this_year(self, page):
+        season, year = self.get_season_year('')
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'year': f'{year}%',
+            'sort': "TRENDING_DESC"
+        }
+        
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        trending = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(trending, "trending_this_year/%d", page)
+    
+
+    def get_trending_last_season(self, page):
+        season, year = self.get_season_year('last')
         variables = {
             'page': page,
             'perpage': self.perpage,
@@ -77,10 +162,221 @@ class AniListBrowser:
         if self.countryOfOrigin_type:
             variables['countryOfOrigin'] = self.countryOfOrigin_type
 
-        upcoming = database.get_(self.get_base_res, 24, variables)
-        return self.process_anilist_view(upcoming, "upcoming_next_season/%d", page)
+        trending = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(trending, "trending_last_season/%d", page)
+    
 
-    def get_top_100_anime(self, page):
+    def get_trending_this_season(self, page):
+        season, year = self.get_season_year('this')
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'season': season,
+            'year': f'{year}%',
+            'sort': "TRENDING_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        trending = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(trending, "trending_this_season/%d", page)
+    
+
+    def get_all_time_trending(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'sort': "TRENDING_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        trending = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(trending, "all_time_trending/%d", page)
+    
+
+    def get_popular_last_year(self, page):
+        season, year = self.get_season_year('')
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'year': f'{year - 1}%',
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        popular = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(popular, "popular_last_year/%d", page)
+
+
+    def get_popular_this_year(self, page):
+        season, year = self.get_season_year('')
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'year': f'{year}%',
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        popular = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(popular, "popular_this_year/%d", page)
+
+
+    def get_popular_last_season(self, page):
+        season, year = self.get_season_year('last')
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'season': season,
+            'year': f'{year}%',
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        popular = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(popular, "popular_last_season/%d", page)
+    
+
+    def get_popular_this_season(self, page):
+        season, year = self.get_season_year('this')
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'season': season,
+            'year': f'{year}%',
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        popular = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(popular, "popular_this_season/%d", page)
+    
+
+    def get_all_time_popular(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        popular = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(popular, "all_time_popular/%d", page)
+    
+
+    def get_voted_last_year(self, page):
+        season, year = self.get_season_year('')
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'year': f'{year - 1}%',
+            'sort': "SCORE_DESC"
+        }
+        
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        voted = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(voted, "voted_last_year/%d", page)
+    
+
+    def get_voted_this_year(self, page):
+        season, year = self.get_season_year('')
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'year': f'{year}%',
+            'sort': "SCORE_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        voted = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(voted, "voted_this_year/%d", page)
+    
+
+    def get_voted_last_season(self, page):
+        season, year = self.get_season_year('last')
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'season': season,
+            'year': f'{year}%',
+            'sort': "SCORE_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        voted = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(voted, "voted_last_season/%d", page)
+    
+
+    def get_voted_this_season(self, page):
+        season, year = self.get_season_year('this')
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'season': season,
+            'year': f'{year}%',
+            'sort': "SCORE_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        voted = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(voted, "voted_this_season/%d", page)
+    
+
+    def get_all_time_voted(self, page):
         variables = {
             'page': page,
             'perpage': self.perpage,
@@ -93,8 +389,463 @@ class AniListBrowser:
         if self.countryOfOrigin_type:
             variables['countryOfOrigin'] = self.countryOfOrigin_type
 
-        top_100_anime = database.get_(self.get_base_res, 24, variables)
-        return self.process_anilist_view(top_100_anime, "top_100_anime/%d", page)
+        voted = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(voted, "all_time_voted/%d", page)
+    
+
+    def get_favourites_last_year(self, page):
+        season, year = self.get_season_year('')
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'year': f'{year - 1}%',
+            'sort': "FAVOURITES_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        favourites = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(favourites, "favourites_last_year/%d", page)
+    
+
+    def get_favourites_this_year(self, page):
+        season, year = self.get_season_year('')
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'year': f'{year}%',
+            'sort': "FAVOURITES_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        favourites = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(favourites, "favourites_this_year/%d", page)
+    
+
+    def get_favourites_last_season(self, page):
+        season, year = self.get_season_year('last')
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'season': season,
+            'year': f'{year}%',
+            'sort': "FAVOURITES_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        favourites = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(favourites, "favourites_last_season/%d", page)
+    
+
+    def get_favourites_this_season(self, page):
+        season, year = self.get_season_year('this')
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'season': season,
+            'year': f'{year}%',
+            'sort': "FAVOURITES_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        favourites = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(favourites, "favourites_this_season/%d", page)
+    
+
+    def get_all_time_favourites(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'sort': "FAVOURITES_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        favourites = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(favourites, "all_time_favourites/%d", page)
+    
+
+    def get_top_100(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'sort': "SCORE_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        top_100 = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(top_100, "top_100/%d", page)
+    
+
+    def get_genre_action(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Action",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_action/%d", page)
+    
+
+    def get_genre_adventure(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Adventure",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_adventure/%d", page)
+    
+
+    def get_genre_comedy(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Comedy",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_comedy/%d", page)
+    
+
+    def get_genre_drama(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Drama",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_drama/%d", page)
+    
+
+    def get_genre_ecchi(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Ecchi",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_ecchi/%d", page)
+    
+
+    def get_genre_fantasy(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Fantasy",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_fantasy/%d", page)
+    
+
+    def get_genre_hentai(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Hentai",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_hentai/%d", page)
+    
+    
+    def get_genre_horror(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Horror",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_horror/%d", page)
+    
+
+    def get_genre_shoujo(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Shoujo",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_shoujo/%d", page)
+    
+
+    def get_genre_mecha(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Mecha",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_mecha/%d", page)
+    
+
+    def get_genre_music(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Music",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_music/%d", page)
+    
+
+    def get_genre_mystery(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Mystery",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_mystery/%d", page)
+    
+
+    def get_genre_psychological(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Psychological",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_psychological/%d", page)
+    
+
+    def get_genre_romance(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Romance",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_romance/%d", page)
+    
+
+    def get_genre_sci_fi(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Sci-Fi",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_sci_fi/%d", page)
+    
+
+    def get_genre_slice_of_life(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Slice of Life",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_slice_of_life/%d", page)
+    
+
+    def get_genre_sports(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Sports",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_sports/%d", page)
+    
+
+    def get_genre_supernatural(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Supernatural",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_supernatural/%d", page)
+    
+
+    def get_genre_thriller(self, page):
+        variables = {
+            'page': page,
+            'perpage': self.perpage,
+            'type': "ANIME",
+            'includedGenres': "Thriller",
+            'sort': "POPULARITY_DESC"
+        }
+
+        if self.format_in_type:
+            variables['format'] = self.format_in_type
+        if self.countryOfOrigin_type:
+            variables['countryOfOrigin'] = self.countryOfOrigin_type
+
+        genre = database.get_(self.get_base_res, 24, variables)
+        return self.process_anilist_view(genre, "genre_thriller/%d", page)
+
 
     def get_search(self, query, page=1):
         variables = {
@@ -147,6 +898,7 @@ class AniListBrowser:
             $format:[MediaFormat],
             $countryOfOrigin:CountryCode
             $season: MediaSeason,
+            $includedGenres: [String],
             $year: String,
             $status: MediaStatus,
             $sort: [MediaSort] = [POPULARITY_DESC, SCORE_DESC]
@@ -158,6 +910,7 @@ class AniListBrowser:
                 ANIME: media (
                     format_in: $format,
                     type: $type,
+                    genre_in: $includedGenres,
                     season: $season,
                     startDate_like: $year,
                     sort: $sort,
