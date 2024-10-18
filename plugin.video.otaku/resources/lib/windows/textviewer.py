@@ -28,7 +28,7 @@ class TextViewerXML(WindowXMLDialog):
     def onAction(self, action):
         actionID = action.getId()
 
-        if action in [92, 10]:
+        if action in [92, 10, 100, 401]:
             self.close()
         if actionID == 7:
             self.handle_action(actionID)

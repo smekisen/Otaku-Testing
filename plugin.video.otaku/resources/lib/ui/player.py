@@ -55,6 +55,15 @@ class WatchlistPlayer(player):
     # def onPlayBackStarted(self):
     #     pass
 
+    def onPlayBackStarted(self):
+        if self._build_playlist and playList.size() == 1:
+            self._build_playlist(self.mal_id, self.episode)
+            
+        current_ = playList.getposition()
+        try:
+            self.media_type = playList[current_].getVideoInfoTag().getMediaType()
+        except:
+            self.media_type = ''
 
     def onPlayBackStopped(self):
         control.closeAllDialogs()
@@ -251,9 +260,37 @@ class PlayerDialogs(xbmc.Player):
         args = self._get_next_item_args()
         args['skipoutro_end'] = skipoutro_end
         if skipoutro_aniskip:
-            PlayingNext(*('playing_next_aniskip.xml', control.ADDON_PATH), actionArgs=args).doModal()
+            dialog_mapping = {
+                '0': 'skip_outro_default.xml',
+                '1': 'skip_outro_ah2.xml',
+                '2': 'skip_outro_auramod.xml',
+                '3': 'skip_outro_af.xml',
+                '4': 'skip_outro_az.xml'
+            }
+
+            setting_value = control.getSetting('general.dialog')
+            xml_file = dialog_mapping.get(setting_value)
+
+            # Call PlayingNext with the retrieved XML file
+            if xml_file:
+                PlayingNext(*(xml_file, control.ADDON_PATH), actionArgs=args).doModal()
+            PlayingNext(*(xml_file, control.ADDON_PATH), actionArgs=args).doModal()
         else:
-            PlayingNext(*('playing_next.xml', control.ADDON_PATH), actionArgs=args).doModal()
+            dialog_mapping = {
+                '0': 'playing_next_default.xml',
+                '1': 'playing_next_ah2.xml',
+                '2': 'playing_next_auramod.xml',
+                '3': 'playing_next_af.xml',
+                '4': 'playing_next_az.xml'
+            }
+            
+            setting_value = control.getSetting('general.dialog')
+            xml_file = dialog_mapping.get(setting_value)
+            
+            # Call PlayingNext with the retrieved XML file
+            if xml_file:
+                PlayingNext(*(xml_file, control.ADDON_PATH), actionArgs=args).doModal()
+
 
     @staticmethod
     def show_skip_intro(skipintro_aniskip, skipintro_end):
@@ -263,7 +300,22 @@ class PlayerDialogs(xbmc.Player):
             'skipintro_aniskip': skipintro_aniskip,
             'skipintro_end': skipintro_end
         }
-        SkipIntro(*('skip_intro.xml', control.ADDON_PATH), actionArgs=args).doModal()
+
+        dialog_mapping = {
+            '0': 'skip_intro_default.xml',
+            '1': 'skip_intro_ah2.xml',
+            '2': 'skip_intro_auramod.xml',
+            '3': 'skip_intro_af.xml',
+            '4': 'skip_intro_az.xml'
+        }
+        
+        setting_value = control.getSetting('general.dialog')
+        xml_file = dialog_mapping.get(setting_value)
+        
+        # Call SkipIntro with the retrieved XML file
+        if xml_file:
+            SkipIntro(*(xml_file, control.ADDON_PATH), actionArgs=args).doModal()
+
 
     @staticmethod
     def _get_next_item_args():
