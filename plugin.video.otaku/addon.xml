@@ -12,7 +12,7 @@
   </extension>
   <extension point="xbmc.service" library="service.py" />
   <extension point="xbmc.addon.metadata">
-    <reuselanguageinvoker>false</reuselanguageinvoker> <!-- You can enable this if you want, expect some instability but much faster menu speeds -->
+    <reuselanguageinvoker>true</reuselanguageinvoker> <!-- You can enable this if you want, expect some instability but much faster menu speeds -->
     <summary lang="en">Otaku video plugin</summary>
     <description lang="en">HD Animes</description>
     <platform>all</platform>

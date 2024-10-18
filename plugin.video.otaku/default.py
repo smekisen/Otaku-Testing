@@ -630,7 +630,7 @@ def FAVOURITES_MENU(payload, params):
 @Route('genres')
 def GENRES_MENU(payload, params):
     GENRES_ITEMS = [
-        (control.lang(30934), "genres///1", 'completed_01.png'),
+        (control.lang(30934), "genres///1", 'genre_multi.png'),
         (control.lang(30935), "genre_action/1", 'genre_action.png'),
         (control.lang(30936), "genre_adventure/1", 'genre_adventure.png'),
         (control.lang(30937), "genre_comedy/1", 'genre_comedy.png'),
@@ -680,8 +680,8 @@ def TOOLS_MENU(payload, params):
         (control.lang(30014), "rebuild_database", {'plot': "Rebuild Database"}, 'rebuild_database.png'),
         (control.lang(30015), "completed_sync", {'plot': "Sync Completed Anime with Otaku"}, "sync_completed.png"),
         (control.lang(30016), 'download_manager', {'plot': "Open Download Manager"}, 'download_manager.png'),
-        (control.lang(30017), 'sort_select', {'plot': "Choose Sorting..."}, ''),
-        (control.lang(30018), 'clear_slected_fanart', {'plot': "Clear All Selected Fanart"}, 'delete.png')
+        (control.lang(30017), 'sort_select', {'plot': "Choose Sorting..."}, 'sort_select.png'),
+        (control.lang(30018), 'clear_slected_fanart', {'plot': "Clear All Selected Fanart"}, 'wipe_addon_data.png')
     ]
 
     control.draw_items([utils.allocate_item(name, url, False, False, image, info) for name, url, info, image in TOOLS_ITEMS], 'addons')
