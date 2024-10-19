@@ -394,7 +394,7 @@ msgid "Episode View"
 msgstr ""
 
 msgctxt "#30314"
-msgid "Get Watchlist Episode Data"
+msgid "Fetch Watchlist Episode Data"
 msgstr ""
 
 msgctxt "#30315"
@@ -690,11 +690,11 @@ msgid "Timeout for Source Scraping (seconds)"
 msgstr ""
 
 msgctxt "#30393"
-msgid "Set Anime Filter"
+msgid "Filter Only Dubs"
 msgstr ""
 
 msgctxt "#30394"
-msgid "Filter"
+msgid "Show [COLOR blue](DUB)[/COLOR] in titles for dubbed content"
 msgstr ""
 
 msgctxt "#30395"
@@ -938,7 +938,7 @@ msgid "Widgets"
 msgstr ""
 
 msgctxt "#30511"
-msgid "Hide Next up Widget"
+msgid "Hide Next Item in Widgets"
 msgstr ""
 
 msgctxt "#30512"

@@ -6,7 +6,7 @@ from functools import partial
 from resources.lib.ui.BrowserBase import BrowserBase
 from resources.lib.ui import source_utils, control
 
-PATH = control.getSetting('download.location')
+PATH = control.getSetting('folder.location')
 
 
 class Sources(BrowserBase):

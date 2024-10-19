@@ -274,7 +274,6 @@ class PlayerDialogs(xbmc.Player):
             # Call PlayingNext with the retrieved XML file
             if xml_file:
                 PlayingNext(*(xml_file, control.ADDON_PATH), actionArgs=args).doModal()
-            PlayingNext(*(xml_file, control.ADDON_PATH), actionArgs=args).doModal()
         else:
             dialog_mapping = {
                 '0': 'playing_next_default.xml',

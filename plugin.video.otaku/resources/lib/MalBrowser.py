@@ -1165,7 +1165,7 @@ class MalBrowser:
 
 
     @div_flavor
-    def recommendation_relation_view(self, res, completed=None, mal_dub=None, dubsub_filter=None):
+    def recommendation_relation_view(self, res, completed=None, mal_dub=None):
         if res.get('entry'):
             res = res['entry']
         if not completed:
@@ -1199,7 +1199,7 @@ class MalBrowser:
             "info": info
         }
 
-        return utils.parse_view(base, True, False, dub=dub, dubsub_filter=dubsub_filter)
+        return utils.parse_view(base, True, False, dub)
 
     def get_genres(self):
         res = database.get_(self.get_base_res, 24, f'{self._URL}/genres/anime')
@@ -1244,7 +1244,7 @@ class MalBrowser:
 
 
     @div_flavor
-    def base_mal_view(self, res, completed=None, mal_dub=None, dubsub_filter=None):
+    def base_mal_view(self, res, completed=None, mal_dub=None):
         if not completed:
             completed = {}
 
@@ -1257,7 +1257,9 @@ class MalBrowser:
         kodi_meta = pickle.loads(show_meta.get('art')) if show_meta else {}
 
         title = res[self._TITLE_LANG] or res['title']
-
+        rating = res.get('rating')
+        if rating == 'Rx - Hentai':
+            title += ' - ' + control.colorstr("Adult", 'red')
         if res.get('relation'):
             title += ' [I]%s[/I]' % control.colorstr(res['relation'], 'limegreen')
 
@@ -1265,7 +1267,7 @@ class MalBrowser:
             'UniqueIDs': {'mal_id': str(mal_id)},
             'title': title,
             'plot': res.get('synopsis'),
-            'mpaa': res.get('rating'),
+            'mpaa': rating,
             'duration': self.duration_to_seconds(res.get('duration')),
             'genre': [x['name'] for x in res.get('genres', [])],
             'studio': [x['name'] for x in res.get('studios', [])],
@@ -1315,8 +1317,9 @@ class MalBrowser:
         if res.get('type') in ['Movie', 'ONA', 'Special'] and res['episodes'] == 1:
             base['url'] = f'play_movie/{mal_id}/'
             base['info']['mediatype'] = 'movie'
-            return utils.parse_view(base, False, True, dub=dub, dubsub_filter=dubsub_filter)
-        return utils.parse_view(base, True, False, dub=dub, dubsub_filter=dubsub_filter)
+            return utils.parse_view(base, False, True, dub)
+        return utils.parse_view(base, True, False, dub)
+
 
     def database_update_show(self, res):
         mal_id = res['mal_id']

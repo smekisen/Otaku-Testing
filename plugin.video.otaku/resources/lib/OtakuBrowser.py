@@ -48,15 +48,6 @@ def get_episodeList(mal_id, pass_idx):
     return items
 
 
-def get_meta_ids(mal_id):
-    params = {
-        "type": "mal",
-        "id": mal_id
-    }
-    r = requests.get('https://armkai.vercel.app/api/search', params=params)
-    return r.json()
-
-
 def get_backup(mal_id, source):
     params = {
         "type": "myanimelist",

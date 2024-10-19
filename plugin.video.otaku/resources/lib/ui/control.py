@@ -307,7 +307,8 @@ def draw_items(video_data, content_type=None, draw_cm=None):
         bulk_draw_items(video_data, draw_cm)
     else:
         for vid in video_data:
-            xbmc_add_dir(vid['name'], vid['url'], vid['image'], vid['info'], draw_cm, False, vid['isfolder'], vid['isplayable'])
+            if vid:
+                xbmc_add_dir(vid['name'], vid['url'], vid['image'], vid['info'], draw_cm, False, vid['isfolder'], vid['isplayable'])
     if content_type:
         xbmcplugin.setContent(HANDLE, content_type)
     if content_type == 'episodes':
@@ -362,7 +363,7 @@ def draw_items(video_data, content_type=None, draw_cm=None):
 
 
 def bulk_player_list(video_data, draw_cm=None, bulk_add=True):
-    return [xbmc_add_dir(vid['name'], vid['url'], vid['image'], vid['info'], draw_cm, bulk_add, vid['isfolder'], vid['isplayable']) for vid in video_data]
+    return [xbmc_add_dir(vid['name'], vid['url'], vid['image'], vid['info'], draw_cm, bulk_add, vid['isfolder'], vid['isplayable']) for vid in video_data if vid]
 
 
 def get_view_type(viewtype):
@@ -437,7 +438,8 @@ class SettingIDs:
         self.clean_titles = getBool('interface.cleantitles')
         self.terminateoncloud = getBool('general.terminate.oncloud')
         self.terminateonlocal = getBool('general.terminate.onlocal')
-        self.div_flavor = getBool("divflavors.bool")
+        self.dubonly = getBool("divflavors.dubonly")
+        self.showdub = getBool("divflavors.showdub")
         self.watchlist_data = getBool('interface.watchlist.data')
         self.fanart_select = getBool('context.otaku.fanartselect')
 

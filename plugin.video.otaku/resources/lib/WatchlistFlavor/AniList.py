@@ -186,12 +186,11 @@ class AniListWLF(WatchlistFlavorBase):
         return all_results
 
     @div_flavor
-    def base_watchlist_status_view(self, res, mal_dub=None, dubsub_filter=None):
+    def base_watchlist_status_view(self, res, mal_dub=None):
         progress = res['progress']
         res = res['media']
 
         mal_id = res.get('idMal')
-
         dub = True if mal_dub and mal_dub.get(str(mal_id)) else False
 
         title = res['title'].get(self._title_lang) or res['title'].get('userPreferred')
@@ -256,14 +255,16 @@ class AniListWLF(WatchlistFlavorBase):
         if res['format'] == 'MOVIE' and res['episodes'] == 1:
             base['url'] = f'play_movie/{mal_id}/'
             base['info']['mediatype'] = 'movie'
-            return utils.parse_view(base, False, True, dub=dub, dubsub_filter=dubsub_filter)
-        return utils.parse_view(base, True, False, dub=dub, dubsub_filter=dubsub_filter)
+            return utils.parse_view(base, False, True, dub)
+        return utils.parse_view(base, True, False, dub)
 
-    def _base_next_up_view(self, res):
+    @div_flavor
+    def _base_next_up_view(self, res, mal_dub=None):
         progress = res['progress']
         res = res['media']
 
         mal_id = res.get('idMal')
+        dub = True if mal_dub and mal_dub.get(str(mal_id)) else False
 
         next_up = progress + 1
         episode_count = res['episodes'] if res['episodes'] else 0
@@ -307,11 +308,11 @@ class AniListWLF(WatchlistFlavorBase):
         if res['format'] == 'MOVIE' and res['episodes'] == 1:
             base['url'] = f"play_movie/{mal_id}/"
             base['info']['mediatype'] = 'movie'
-            return utils.parse_view(base, False, True)
+            return utils.parse_view(base, False, True, dub)
         if next_up_meta:
             base['url'] = f"play/{mal_id}/{next_up}"
-            return utils.parse_view(base, False, True)
-        return utils.parse_view(base, True, False)
+            return utils.parse_view(base, False, True, dub)
+        return utils.parse_view(base, True, False, dub)
 
     def get_watchlist_anime_entry(self, mal_id):
         query = '''

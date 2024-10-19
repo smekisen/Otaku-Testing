@@ -1505,7 +1505,7 @@ class AniListBrowser:
         return database.get_show(res['idMal'])
 
     @div_flavor
-    def base_anilist_view(self, res, completed=None, mal_dub=None, dubsub_filter=None):
+    def base_anilist_view(self, res, completed=None, mal_dub=None):
         if not completed:
             completed = {}
         anilist_id = res['id']
@@ -1603,8 +1603,8 @@ class AniListBrowser:
         if res['format'] in ['MOVIE', 'ONA', 'SPECIAL'] and res['episodes'] == 1:
             base['url'] = f'play_movie/{mal_id}/'
             base['info']['mediatype'] = 'movie'
-            return utils.parse_view(base, False, True, dub=dub, dubsub_filter=dubsub_filter)
-        return utils.parse_view(base, True, False, dub=dub, dubsub_filter=dubsub_filter)
+            return utils.parse_view(base, False, True, dub)
+        return utils.parse_view(base, True, False, dub)
 
     def database_update_show(self, res):
         mal_id = res.get('idMal')
@@ -1682,7 +1682,7 @@ class AniListBrowser:
             tags_list = [x['name'] for x in results['tags'] if not x['isAdult']]
         except KeyError:
             tags_list = []
-        multiselect = control.multiselect_dialog(control.lang(30004), genres_list + tags_list)
+        multiselect = control.multiselect_dialog(control.lang(30934), genres_list + tags_list)
         if not multiselect:
             return []
         genre_display_list = []

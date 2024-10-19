@@ -107,10 +107,7 @@ Code Valid for {control.colorstr(device_code["expires_in"] - i * device_code["in
         if not results:
             return []
 
-        if next_up:
-            all_results = list(filter(lambda x: True if x else False, map(self._base_next_up_view, results['anime'])))
-        else:
-            all_results = list(map(self._base_watchlist_status_view, results['anime']))
+        all_results = list(map(self._base_next_up_view, results['anime'])) if next_up else list(map(self._base_watchlist_status_view, results['anime']))
 
         sort_pref = self.__get_sort()
 
@@ -125,12 +122,12 @@ Code Valid for {control.colorstr(device_code["expires_in"] - i * device_code["in
         return all_results
 
     @div_flavor
-    def _base_watchlist_status_view(self, res, mal_dub=None, dubsub_filter=None):
+    def _base_watchlist_status_view(self, res, mal_dub=None):
         show_ids = res['show']['ids']
 
         mal_id = show_ids.get('mal')
-
         dub = True if mal_dub and mal_dub.get(str(mal_id)) else False
+
         show = database.get_show(mal_id)
         kodi_meta = pickle.loads(show['kodi_meta']) if show else {}
 
@@ -163,13 +160,15 @@ Code Valid for {control.colorstr(device_code["expires_in"] - i * device_code["in
         if res["total_episodes_count"] == 1:
             base['url'] = f'play_movie/{mal_id}/'
             base['info']['mediatype'] = 'movie'
-            return utils.parse_view(base, False, True, dub=dub, dubsub_filter=dubsub_filter)
-        return utils.parse_view(base, True, False, dub=dub, dubsub_filter=dubsub_filter)
+            return utils.parse_view(base, False, True, dub)
+        return utils.parse_view(base, True, False, dub)
 
-    def _base_next_up_view(self, res):
+    @div_flavor
+    def _base_next_up_view(self, res, mal_dub=None):
         show_ids = res['show']['ids']
 
         mal_id = show_ids.get('mal')
+        dub = True if mal_dub and mal_dub.get(str(mal_id)) else False
 
         progress = res['watched_episodes_count']
         next_up = progress + 1
@@ -220,13 +219,13 @@ Code Valid for {control.colorstr(device_code["expires_in"] - i * device_code["in
         if res["total_episodes_count"] == 1:
             base['url'] = f'play_movie/{mal_id}/'
             base['info']['mediatype'] = 'movie'
-            return utils.parse_view(base, False, True)
+            return utils.parse_view(base, False, True, dub)
 
         if next_up_meta:
             base['url'] = 'play/%d/%d' % (mal_id, next_up)
-            return utils.parse_view(base, False, True)
+            return utils.parse_view(base, False, True, dub)
 
-        return utils.parse_view(base, True, False)
+        return utils.parse_view(base, True, False, dub)
 
     @staticmethod
     def get_watchlist_anime_entry(mal_id):

@@ -6,6 +6,8 @@ from resources.lib.WatchlistFlavor.WatchlistFlavorBase import WatchlistFlavorBas
 from resources.lib.indexers.simkl import SIMKLAPI
 from urllib import parse
 
+from resources.lib.ui.divide_flavors import div_flavor
+
 
 class KitsuWLF(WatchlistFlavorBase):
     _URL = "https://kitsu.io/api"
@@ -141,9 +143,11 @@ class KitsuWLF(WatchlistFlavorBase):
         all_results += self.handle_paging(result['links'].get('next'), base_plugin_url, page)
         return all_results
 
-    def _base_watchlist_view(self, res, eres):
+    @div_flavor
+    def _base_watchlist_view(self, res, eres, mal_dub=None):
         kitsu_id = eres['id']
         mal_id = self.mapping_mal(kitsu_id)
+        dub = True if mal_dub and mal_dub.get(str(mal_id)) else False
 
         info = {
             'plot': eres['attributes'].get('synopsis'),
@@ -179,13 +183,15 @@ class KitsuWLF(WatchlistFlavorBase):
         if eres['attributes']['subtype'] == 'movie' and eres['attributes']['episodeCount'] == 1:
             base['url'] = f'play_movie/{mal_id}/'
             base['info']['mediatype'] = 'movie'
-            return utils.parse_view(base, False, True)
+            return utils.parse_view(base, False, True, dub)
 
-        return utils.parse_view(base, True, False)
+        return utils.parse_view(base, True, False, dub)
 
-    def _base_next_up_view(self, res, eres):
+    @div_flavor
+    def _base_next_up_view(self, res, eres, mal_dub=None):
         kitsu_id = eres['id']
         mal_id = self.mapping_mal(kitsu_id)
+        dub = True if mal_dub and mal_dub.get(str(mal_id)) else False
 
         progress = res["attributes"]['progress']
         next_up = progress + 1
@@ -224,14 +230,14 @@ class KitsuWLF(WatchlistFlavorBase):
 
         if next_up_meta:
             base['url'] = 'play/%d/%d/' % (mal_id, next_up)
-            return utils.parse_view(base, False, True)
+            return utils.parse_view(base, False, True, dub)
 
         if eres['attributes']['subtype'] == 'movie' and eres['attributes']['episodeCount'] == 1:
             base['url'] = f"play_movie/{mal_id}/"
             base['info']['mediatype'] = 'movie'
-            return utils.parse_view(base, False, True)
+            return utils.parse_view(base, False, True, dub)
 
-        return utils.parse_view(base, True, False)
+        return utils.parse_view(base, True, False, dub)
 
     def mapping_mal(self, kitsu_id):
         mal_id = ''

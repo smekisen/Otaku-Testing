@@ -215,7 +215,7 @@
             <group id="2" label="30330" help="">
                 <setting id="browser.api" type="string" label="30330" help="">
                     <level>3</level>
-                    <default>anilist</default>
+                    <default>mal</default>
                     <constraints>
                         <options>
                             <option label="MAL">mal</option>
@@ -310,25 +310,20 @@
                         <popup>false</popup>
                     </control>
                 </setting>
-                <setting id="divflavors.bool" type="boolean" label="30393" help="">
+
+
+                <setting id="divflavors.dubonly" type="boolean" label="30393" help="">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="divflavors.menu" type="string" label="30394" help="">
+                <setting id="divflavors.showdub" type="boolean" label="30394" help="">
                     <level>0</level>
-                    <default>Both</default>
-                    <constraints>
-                        <options>
-                            <option label="Dub">Dub</option>
-                            <option label="Both">Both</option>
-                        </options>
-                    </constraints>
-                    <control type="spinner" format="string" />
-                  	<dependencies>
-                        <dependency type="visible" setting="divflavors.bool">true</dependency>
-                    </dependencies>
+                    <default>true</default>
+                    <control type="toggle"/>
                 </setting>
+
+                
                 <setting id="contentformat.bool" type="boolean" label="30372" help="">
                     <level>0</level>
                     <default>false</default>
@@ -461,10 +456,10 @@
                 </setting>
                 <setting id="jz.dub" type="boolean" label="30320" help="">
                     <level>3</level>
-                    <default>true</default>
+                    <default>false</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="jz.dub.api" type="string" label="30321" help="">
+                <setting id="jz.dub.api" type="string" label="30321" help="" parent="jz.dub">
                     <level>3</level>
                     <default>1</default>
                     <constraints>
@@ -474,6 +469,9 @@
                         </options>
                     </constraints>
                     <control type="spinner" format="string" />
+                    <dependencies>
+                        <dependency type="visible" setting="jz.dub">true</dependency>
+                    </dependencies>
                 </setting>
                 <setting id="jz.filler" type="boolean" label="30322" help="">
                     <level>3</level>
@@ -531,7 +529,7 @@
             <group id="5" label="30510" help="">
                 <setting id="widget.hide.nextpage" type="boolean" label="30511" help="">
                     <level>0</level>
-                    <default>true</default>
+                    <default>false</default>
                     <control type="toggle"/>
                 </setting>
             </group>
@@ -579,10 +577,10 @@
             <group id="2" label="30333" help="">
                 <setting id="provider.hianime" type="boolean" label="30402" help="">
                     <level>0</level>
-                    <default>false</default>
+                    <default>true</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="provider.hianimealt" type="boolean" label="30411" help="">
+                <setting id="provider.hianimealt" type="boolean" label="30411" help="" parent="provider.hianime">
                     <level>0</level>
                     <default>false</default>
                     <control type="toggle"/>
@@ -676,7 +674,7 @@
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="download.location" type="path" label="30543" help="">
+                <setting id="folder.location" type="path" label="30543" help="" parent="provider.localfiles">
                     <level>0</level>
                     <default/>
                     <constraints>
@@ -1549,6 +1547,9 @@
                     <level>0</level>
                     <default>false</default>
                     <control type="toggle"/>
+                    <dependencies>
+                        <dependency type="visible" setting="watchlist.update.enabled">true</dependency>
+                    </dependencies>
                 </setting>
             </group>
 
@@ -2037,7 +2038,7 @@
                 </setting>
                 <setting id="genre_hentai/1" type="boolean" label="30941" help="">
                     <level>0</level>
-                    <default>true</default>
+                    <default>false</default>
                     <control type="toggle"/>
                 </setting>
                 <setting id="genre_horror/1" type="boolean" label="30942" help="">
@@ -2133,7 +2134,7 @@
                 </setting>
                 <setting id="context.otaku.deletefromdatabase" type="boolean" label="30506" help="">
                     <level>0</level>
-                    <default>true</default>
+                    <default>false</default>
                     <control type="toggle"/>
                 </setting>
                 <setting id="context.otaku.watchlist" type="boolean" label="30507" help="">
@@ -2148,7 +2149,7 @@
                 </setting>
                 <setting id="context.otaku.fanartselect" type="boolean" label="30509" help="">
                     <level>0</level>
-                    <default>true</default>
+                    <default>false</default>
                     <control type="toggle"/>
                 </setting>
             </group>

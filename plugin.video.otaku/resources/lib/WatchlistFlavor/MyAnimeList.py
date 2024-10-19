@@ -132,16 +132,13 @@ class MyAnimeListWLF(WatchlistFlavorBase):
     def _process_status_view(self, url, params, next_up, base_plugin_url, page):
         r = requests.get(url, headers=self.__headers(), params=params)
         results = r.json()
-        if next_up:
-            all_results = list(filter(lambda x: True if x else False, map(self._base_next_up_view, results['data'])))
-        else:
-            all_results = list(map(self._base_watchlist_status_view, results['data']))
+        all_results = list(map(self._base_next_up_view, results['data'])) if next_up else list(map(self._base_watchlist_status_view, results['data']))
 
         all_results += self.handle_paging(results['paging'].get('next'), base_plugin_url, page)
         return all_results
 
     @div_flavor
-    def _base_watchlist_status_view(self, res, mal_dub=None, dubsub_filter=None):
+    def _base_watchlist_status_view(self, res, mal_dub=None):
         mal_id = res['node']['id']
         dub = True if mal_dub and mal_dub.get(str(mal_id)) else False
 
@@ -183,11 +180,13 @@ class MyAnimeListWLF(WatchlistFlavorBase):
         if res['node']['media_type'] == 'movie' and eps == 1:
             base['url'] = f'play_movie/{mal_id}/'
             base['info']['mediatype'] = 'movie'
-            return utils.parse_view(base, False, True, dub=dub, dubsub_filter=dubsub_filter)
-        return utils.parse_view(base, True, False, dub=dub, dubsub_filter=dubsub_filter)
+            return utils.parse_view(base, False, True, dub)
+        return utils.parse_view(base, True, False, dub)
 
-    def _base_next_up_view(self, res):
+    @div_flavor
+    def _base_next_up_view(self, res, mal_dub=None):
         mal_id = res['node']['id']
+        dub = True if mal_dub and mal_dub.get(str(mal_id)) else False
 
         eps_watched = res['list_status']["num_episodes_watched"]
         next_up = eps_watched + 1
@@ -236,13 +235,13 @@ class MyAnimeListWLF(WatchlistFlavorBase):
         if res['node']['media_type'] == 'movie' and eps_total == 1:
             base['url'] = f'play_movie/{mal_id}/'
             base['info']['mediatype'] = 'movie'
-            return utils.parse_view(base, False, True)
+            return utils.parse_view(base, False, True, dub)
 
         if next_up_meta:
             base['url'] = f"play/{mal_id}/{next_up}"
-            return utils.parse_view(base, False, True)
+            return utils.parse_view(base, False, True, dub)
 
-        return utils.parse_view(base, True, False)
+        return utils.parse_view(base, True, False, dub)
 
     def get_watchlist_anime_entry(self, mal_id):
         params = {
