@@ -38,7 +38,7 @@ def allocate_item(name, url, isfolder, isplayable, image='', info=None, fanart=N
 
 
 def parse_view(base, isfolder, isplayable, dub=False):
-    if control.settingids.showdub:
+    if control.settingids.showdub and dub:
         base['name'] += ' [COLOR blue](Dub)[/COLOR]'
         base['info']['title'] = base['name']
     parsed_view = allocate_item(base["name"], base["url"], isfolder, isplayable, base["image"], base["info"], base.get("fanart"), base["image"], base.get("landscape"), base.get("banner"), base.get("clearart"), base.get("clearlogo"))
