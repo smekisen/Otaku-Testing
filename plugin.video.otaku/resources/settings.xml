@@ -310,20 +310,16 @@
                         <popup>false</popup>
                     </control>
                 </setting>
-
-
                 <setting id="divflavors.dubonly" type="boolean" label="30393" help="">
                     <level>0</level>
-                    <default>true</default>
+                    <default>false</default>
                     <control type="toggle"/>
                 </setting>
                 <setting id="divflavors.showdub" type="boolean" label="30394" help="">
                     <level>0</level>
-                    <default>true</default>
+                    <default>false</default>
                     <control type="toggle"/>
                 </setting>
-
-                
                 <setting id="contentformat.bool" type="boolean" label="30372" help="">
                     <level>0</level>
                     <default>false</default>
@@ -1869,7 +1865,7 @@
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="search" type="boolean" label="30912" help="">
+                <setting id="search_history" type="boolean" label="30912" help="">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>

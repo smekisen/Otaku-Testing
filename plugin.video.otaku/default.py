@@ -485,15 +485,15 @@ def LIST_MENU(payload, params):
         (control.lang(30901), "airing_last_season/1", 'airing_anime.png'),
         (control.lang(30902), "airing_this_season/1", 'airing_anime.png'),
         (control.lang(30903), "airing_next_season/1", 'airing_anime.png'),
-        (control.lang(30904), "movies", 'movies.png'),
-        (control.lang(30905), "tv_shows", 'tv_shows.png'),
+        # (control.lang(30904), "movies", 'movies.png'),
+        # (control.lang(30905), "tv_shows", 'tv_shows.png'),
         (control.lang(30906), "trending", 'trending.png'),
         (control.lang(30907), "popular", 'popular.png'),
         (control.lang(30908), "voted", 'voted.png'),
         (control.lang(30909), "favourites", 'favourites.png'),
         (control.lang(30910), "top_100/1", 'top_100_anime.png'),
         (control.lang(30911), "genres", 'genres_&_tags.png'),
-        (control.lang(30912), "search", 'search.png'),
+        (control.lang(30912), "search_history", 'search.png'),
         (control.lang(30913), "tools", 'tools.png')
     ]
 
@@ -507,56 +507,56 @@ def LIST_MENU(payload, params):
     control.draw_items([utils.allocate_item(name, url, True, False, image) for name, url, image in MENU_ITEMS_], 'addons')
 
 
-@Route('movies')
-def MOVIES_MENU(payload, params):
-    MOVIES_ITEMS = [
-        (control.lang(30901), "airing_last_season/1", 'airing_anime.png'),
-        (control.lang(30902), "airing_this_season/1", 'airing_anime.png'),
-        (control.lang(30903), "airing_next_season/1", 'airing_anime.png'),
-        (control.lang(30906), "trending", 'trending.png'),
-        (control.lang(30907), "popular", 'popular.png'),
-        (control.lang(30908), "voted", 'voted.png'),
-        (control.lang(30909), "favourites", 'favourites.png'),
-        (control.lang(30910), "top_100/1", 'top_100_anime.png'),
-        (control.lang(30911), "genres", 'genres_&_tags.png'),
-        (control.lang(30912), "search_history_movie", 'search.png')
-    ]
+# @Route('movies')
+# def MOVIES_MENU(payload, params):
+#     MOVIES_ITEMS = [
+#         (control.lang(30901), "airing_last_season/1", 'airing_anime.png'),
+#         (control.lang(30902), "airing_this_season/1", 'airing_anime.png'),
+#         (control.lang(30903), "airing_next_season/1", 'airing_anime.png'),
+#         (control.lang(30906), "trending", 'trending.png'),
+#         (control.lang(30907), "popular", 'popular.png'),
+#         (control.lang(30908), "voted", 'voted.png'),
+#         (control.lang(30909), "favourites", 'favourites.png'),
+#         (control.lang(30910), "top_100/1", 'top_100_anime.png'),
+#         (control.lang(30911), "genres", 'genres_&_tags.png'),
+#         (control.lang(30912), "search_history_movie", 'search.png')
+#     ]
 
-    if control.getBool('menu.lastwatched'):
-        MOVIES_ITEMS = add_last_watched(MOVIES_ITEMS)
-    MOVIES_ITEMS = add_watchlist(MOVIES_ITEMS)
-    # MOVIES_ITEMS = update_menu_paths(MOVIES_ITEMS, 'movies')
-    MOVIES_ITEMS_ = MOVIES_ITEMS[:]
-    for i in MOVIES_ITEMS:
-        if control.getSetting(i[1]) == 'false':
-            MOVIES_ITEMS_.remove(i)
-    control.draw_items([utils.allocate_item(name, url, True, False, image) for name, url, image in MOVIES_ITEMS_], 'addons')
+#     if control.getBool('menu.lastwatched'):
+#         MOVIES_ITEMS = add_last_watched(MOVIES_ITEMS)
+#     MOVIES_ITEMS = add_watchlist(MOVIES_ITEMS)
+#     # MOVIES_ITEMS = update_menu_paths(MOVIES_ITEMS, 'movies')
+#     MOVIES_ITEMS_ = MOVIES_ITEMS[:]
+#     for i in MOVIES_ITEMS:
+#         if control.getSetting(i[1]) == 'false':
+#             MOVIES_ITEMS_.remove(i)
+#     control.draw_items([utils.allocate_item(name, url, True, False, image) for name, url, image in MOVIES_ITEMS_], 'addons')
 
 
-@Route('tv_shows')
-def TV_SHOWS_MENU(payload, params):
-    TV_SHOWS_ITEMS = [
-        (control.lang(30901), "airing_last_season/1", 'airing_anime.png'),
-        (control.lang(30902), "airing_this_season/1", 'airing_anime.png'),
-        (control.lang(30903), "airing_next_season/1", 'airing_anime.png'),
-        (control.lang(30906), "trending", 'trending.png'),
-        (control.lang(30907), "popular", 'popular.png'),
-        (control.lang(30908), "voted", 'voted.png'),
-        (control.lang(30909), "favourites", 'favourites.png'),
-        (control.lang(30910), "top_100/1", 'top_100_anime.png'),
-        (control.lang(30911), "genres", 'genres_&_tags.png'),
-        (control.lang(30912), "search_history_tvshow", 'search.png')
-    ]
+# @Route('tv_shows')
+# def TV_SHOWS_MENU(payload, params):
+#     TV_SHOWS_ITEMS = [
+#         (control.lang(30901), "airing_last_season/1", 'airing_anime.png'),
+#         (control.lang(30902), "airing_this_season/1", 'airing_anime.png'),
+#         (control.lang(30903), "airing_next_season/1", 'airing_anime.png'),
+#         (control.lang(30906), "trending", 'trending.png'),
+#         (control.lang(30907), "popular", 'popular.png'),
+#         (control.lang(30908), "voted", 'voted.png'),
+#         (control.lang(30909), "favourites", 'favourites.png'),
+#         (control.lang(30910), "top_100/1", 'top_100_anime.png'),
+#         (control.lang(30911), "genres", 'genres_&_tags.png'),
+#         (control.lang(30912), "search_history_tvshow", 'search.png')
+#     ]
 
-    if control.getBool('menu.lastwatched'):
-        TV_SHOWS_ITEMS = add_last_watched(TV_SHOWS_ITEMS)
-    TV_SHOWS_ITEMS = add_watchlist(TV_SHOWS_ITEMS)
-    # TV_SHOWS_ITEMS = update_menu_paths(TV_SHOWS_ITEMS, 'tv_shows')
-    TV_SHOWS_ITEMS_ = TV_SHOWS_ITEMS[:]
-    for i in TV_SHOWS_ITEMS:
-        if control.getSetting(i[1]) == 'false':
-            TV_SHOWS_ITEMS_.remove(i)
-    control.draw_items([utils.allocate_item(name, url, True, False, image) for name, url, image in TV_SHOWS_ITEMS_], 'addons')
+#     if control.getBool('menu.lastwatched'):
+#         TV_SHOWS_ITEMS = add_last_watched(TV_SHOWS_ITEMS)
+#     TV_SHOWS_ITEMS = add_watchlist(TV_SHOWS_ITEMS)
+#     # TV_SHOWS_ITEMS = update_menu_paths(TV_SHOWS_ITEMS, 'tv_shows')
+#     TV_SHOWS_ITEMS_ = TV_SHOWS_ITEMS[:]
+#     for i in TV_SHOWS_ITEMS:
+#         if control.getSetting(i[1]) == 'false':
+#             TV_SHOWS_ITEMS_.remove(i)
+#     control.draw_items([utils.allocate_item(name, url, True, False, image) for name, url, image in TV_SHOWS_ITEMS_], 'addons')
 
 
 @Route('trending')
@@ -659,15 +659,15 @@ def GENRES_MENU(payload, params):
     control.draw_items([utils.allocate_item(name, url, True, False, image) for name, url, image in GENRES_ITEMS_], 'addons')
 
 
-@Route('search')
-def SEARCH_MENU(payload, params):
-    SEARCH_ITEMS = [
-        (control.lang(30954), "search_history", 'search.png'),
-        (control.lang(30955), "search_history_movie", 'search.png'),
-        (control.lang(30956), "search_history_tvshow", 'search.png')
-    ]
+# @Route('search')
+# def SEARCH_MENU(payload, params):
+#     SEARCH_ITEMS = [
+#         (control.lang(30954), "search_history", 'search.png'),
+#         (control.lang(30955), "search_history_movie", 'search.png'),
+#         (control.lang(30956), "search_history_tvshow", 'search.png')
+#     ]
 
-    control.draw_items([utils.allocate_item(name, url, True, False, image) for name, url, image in SEARCH_ITEMS], 'addons')
+#     control.draw_items([utils.allocate_item(name, url, True, False, image) for name, url, image in SEARCH_ITEMS], 'addons')
 
 
 @Route('tools')

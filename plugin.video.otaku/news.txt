@@ -1,9 +1,28 @@
-We Added Syncing!!!!
+Welcome to Otaku's Testing Addon!
 
-Hello Everyone,
+Hi everyone,
 
-We're excited to announce that we've added a new syncing feature to our addon! Currently, syncing is available for completed anime only. This decision was made to ensure optimal speed and performance. Our focus remains on delivering functionality, quality, and speed, and this feature has been a long-time goal of ours.
+Thank you for checking out Otaku's new testing addon. This version is a complete recode, offering more features than the original, with support for Kodi 20 and above. It will soon become the main public release.
 
-A special thank you to Joezito for developing the syncing code and making this possible, and to all the contributors who have supported our addon.
+Please note that this version is still in development, so you may encounter a few bugs. If you do, we encourage you to report them on GitHub and specify the repository you used.
 
-Thank you for your continued support!
+New in this version:
+
+    - MyAnimeList (MAL) menus (AniList menus are still available)
+    - New sorting system for more precise control over your content
+    - Improved scrapping for more accurate data
+    - Reuse Language Invoker support for faster, more efficient performance
+    - New menu settings for more customization
+
+However, you may notice some missing features, such as:
+
+    - Anichart replacement
+    - Get Watch Order context menu
+    - Certain prioritization settings
+    - TV and Movie menus
+
+Some of these will be added in future updates as we continue to improve the addon.
+
+You might also notice some anime missing; this is because we're primarily using MAL IDs to streamline episode metadata, ensuring fewer issues for users.
+
+A huge thank you to the entire Otaku development team and everyone who contributed to this release! Special shoutout to Joezito129, who led the recode and added many of these awesome features. We couldn’t have done it without the team's hard work and dedication!

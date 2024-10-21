@@ -10,8 +10,8 @@ SORT_METHODS = ['none', 'type', 'audio', 'resolution', 'size']
 SORT_OPTIONS = {
     'sortmethod': SORT_METHODS,
     "none": [],
-    "type": ['cloud', 'torrent', 'embeds', 'files', "none"],
-    "audio": ['dualaudio', 'dub', 'sub', 'none'],
+    "type": ['files', 'cloud', 'torrent', 'embeds', "none"],
+    "audio": ['dualaudio', 'sub', 'dub', 'none'],
     "resolution": [],
     "size": []
 }

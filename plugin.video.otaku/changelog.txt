@@ -1,9 +1,15 @@
-Changelog v5.0.53 (xx):
-- Updated viewtype settings
+Changelog v5.1.0 (2024-10-21):
+- Changed alot of Settings
+- Changed alot of Menus
+- Added More Menus
+- Added More Features
 - Added MAl_Browser
-- re-formated ids to use mal_ids instead of anilist
-- Fixed datebase updating episode meta
-
+- New Icons
+- A ton of database changes
+- Improved Scrapping
+- re-formatted ids to use mal_ids instead of anilist
+- Fixed database updating episode meta
+- A ton of bug fixes
 
 Changelog v5.0.52 (2024-10-01):
 - Fixed database updating
