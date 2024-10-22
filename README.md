@@ -1,7 +1,7 @@
-[![Kodi version](https://img.shields.io/badge/kodi%20versions18/19/20/21-blue)](https://kodi.tv/)
+[![Kodi version](https://img.shields.io/badge/kodi%20versions20/21-blue)](https://kodi.tv/)
 [![License: GPL3](https://img.shields.io/badge/License-GPL3-yellow.svg)](https://opensource.org/licenses/GPL-3.0)
 
-# Otaku Repository
+# Otaku Testing Repository
 
 This addon is a fork of the original Kaito addon made by SwagOtaku.
 
@@ -9,23 +9,20 @@ All credit goes to SwagOtaku.
 
 ## Requires
 
-Kodi 18 Leia or later versions.
-Works fine on Kodi 20+
+Kodi 20 Nexus or later versions.
 
 # Installation & Updates
 
 _You can install it via repository to provide automatic updates (future updates may require to rebuild database)_
 
-- Download repository: [repository.otaku](https://github.com/Goldenfreddy0703/repository.otaku/blob/master/repository.otaku-1.0.zip?raw=true)
+- Download repository: [repository.otaku.testing](https://github.com/Goldenfreddy0703/repository.otaku/blob/master/repository.otaku.testing-1.0.zip?raw=true)
 - Or install it via Kodi file-manager
-  - add source: <https://goldenfreddy0703.github.io/repository.otaku>
+  - add source: <https://goldenfreddy0703.github.io/repository.otaku.testing>
 
 _or install it manually in the following order (future updates should not be installed manually and these download links could be outdated)_
 
-- [context.otaku](https://github.com/Goldenfreddy0703/repository.otaku/raw/master/repo/zips/context.otaku/context.otaku-0.0.14.zip)
-- [script.otaku.themepak](https://github.com/Goldenfreddy0703/repository.otaku/raw/master/repo/zips/script.otaku.themepak/script.otaku.themepak-0.0.12.zip)
-- [script.otaku.mappings](https://github.com/Goldenfreddy0703/repository.otaku/raw/master/repo/zips/script.otaku.mappings/script.otaku.mappings-24.05.02.zip)
-- [plugin.video.otaku](https://github.com/Goldenfreddy0703/repository.otaku/raw/master/repo/zips/plugin.video.otaku/plugin.video.otaku-0.5.0.zip)
+- [context.otaku](https://github.com/Goldenfreddy0703/repository.otaku.testing/raw/master/repo/zips/context.otaku/context.otaku-1.0.19.zip)
+- [plugin.video.otaku](https://github.com/Goldenfreddy0703/repository.otaku.testing/raw/master/repo/zips/plugin.video.otaku/plugin.video.otaku-5.1.0.zip)
 
 After each update, it is recommended that you clear cache/rebuild database to make sure changes take effect.
 
@@ -38,9 +35,6 @@ If you guys are having problems with Otaku, please feel free to contact me or ta
 [Troubleshooting Tips For Otaku](https://github.com/Goldenfreddy0703/Otaku/issues/15)
 
 ## Todo List
-
-**_Function_**:
-- TVDB Episode Meta. (We Manage to find an api to help us with that)
 
 **_Optional_**:
 - Accounts: Adding an Easy News Debrid Provider.
