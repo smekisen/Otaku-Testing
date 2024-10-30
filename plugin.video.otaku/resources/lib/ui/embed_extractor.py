@@ -16,73 +16,6 @@ _EMBED_EXTRACTORS = {}
 _EDGE_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.62'
 
 
-def arc4(t, n):
-    u = 0
-    h = ''
-    s = list(range(256))
-    for e in range(256):
-        x = t[e % len(t)]
-        u = (u + s[e] + (x if isinstance(x, int) else ord(x))) % 256
-        s[e], s[u] = s[u], s[e]
-
-    e = u = 0
-    for c in range(len(n)):
-        e = (e + 1) % 256
-        u = (u + s[e]) % 256
-        s[e], s[u] = s[u], s[e]
-        h += chr((n[c] if isinstance(n[c], int) else ord(n[c])) ^ s[(s[e] + s[u]) % 256])
-    return h
-
-
-def serialize_text(input):
-    input = base64.b64encode(bytes(input.encode('latin-1'))).decode()
-    input = input.replace('/', '_').replace('+', '-')
-    return input
-
-
-def deserialize_text(input):
-    input = input.replace('_', '/').replace('-', '+')
-    input = base64.b64decode(input)
-    return input
-
-
-def vrf_shift(vrf, k1, k2):
-    lut = {}
-    for i in range(len(k1)):
-        lut[k1[i]] = k2[i]
-    svrf = ''
-    for c in vrf:
-        svrf += lut[c] if c in lut.keys() else c
-    return svrf
-
-def generate_vrf(content_id):
-    vrf = vrf_shift(content_id, "AP6GeR8H0lwUz1", "UAz8Gwl10P6ReH")
-    vrf = arc4(bytes("ItFKjuWokn4ZpB".encode('latin-1')), bytes(vrf.encode('latin-1')))
-    vrf = serialize_text(vrf)
-    vrf = arc4(bytes("fOyt97QWFB3".encode('latin-1')), bytes(vrf.encode('latin-1')))
-    vrf = serialize_text(vrf)
-    vrf = vrf_shift(vrf, "1majSlPQd2M5", "da1l2jSmP5QM")
-    vrf = vrf_shift(vrf, "CPYvHj09Au3", "0jHA9CPYu3v")
-    vrf = vrf[::-1]
-    vrf = arc4(bytes("736y1uTJpBLUX".encode('latin-1')), bytes(vrf.encode('latin-1')))
-    vrf = serialize_text(vrf)
-    vrf = serialize_text(vrf)
-    return vrf
-
-def decrypt_vrf(text):
-    text = deserialize_text(text)
-    text = deserialize_text(text.decode())
-    text = arc4(bytes("736y1uTJpBLUX".encode('latin-1')), text)
-    text = text[::-1]
-    text = vrf_shift(text, "0jHA9CPYu3v", "CPYvHj09Au3")
-    text = vrf_shift(text, "da1l2jSmP5QM", "1majSlPQd2M5")
-    text = deserialize_text(text)
-    text = arc4(bytes("fOyt97QWFB3".encode('latin-1')), text)
-    text = deserialize_text(text)
-    text = arc4(bytes("ItFKjuWokn4ZpB".encode('latin-1')), text)
-    text = vrf_shift(text, "UAz8Gwl10P6ReH", "AP6GeR8H0lwUz1")
-    return text
-
 def load_video_from_url(in_url):
     found_extractor = None
 
@@ -105,8 +38,8 @@ def load_video_from_url(in_url):
             return found_extractor['parser'](in_url, data)
 
         control.log("Probing source: %s" % in_url)
-        # reqObj = client.request(in_url, output='extended')
-        r = requests.get(in_url, stream=True)
+        headers = {'User-Agent': _EDGE_UA}
+        r = requests.get(in_url, stream=True, headers=headers)
         if r.ok:
             return found_extractor['parser'](r.url, r.text, r.headers.get('Referer'))
     except error.URLError:
@@ -167,65 +100,6 @@ def __extract_lulu(url, page_content, referer=None):
         return r.group(1) + __append_headers(headers)
 
 
-def __extract_vidplay(slink, page_content, referer=None):
-    def generate_mid(content_id):
-        vrf = arc4(bytes("V4pBzCPyMSwqx".encode('latin-1')), bytes(content_id.encode('latin-1')))
-        vrf = serialize_text(vrf)
-        vrf = vrf_shift(vrf, "4pjVI6otnvxW", "Ip64xWVntvoj")
-        vrf = vrf[::-1]
-        vrf = vrf_shift(vrf, "kHWPSL5RKG9Ei8Q", "REG859WSLiQkKHP")
-        vrf = arc4(bytes("eLWogkrHstP".encode('latin-1')), bytes(vrf.encode('latin-1')))
-        vrf = serialize_text(vrf)
-        vrf = vrf[::-1]
-        vrf = arc4(bytes("bpPVcKMFJXq".encode('latin-1')), bytes(vrf.encode('latin-1')))
-        vrf = serialize_text(vrf)
-        vrf = vrf_shift(vrf, "VtravPeTH34OUog", "OeaTrt4H3oVgvPU")
-        vrf = vrf[::-1]
-        vrf = serialize_text(vrf)
-        return vrf
-
-    def decode_vurl(text):
-        res = deserialize_text(text)
-        res = res.decode()
-        res = res[::-1]
-        res = vrf_shift(res, "OeaTrt4H3oVgvPU", "VtravPeTH34OUog")
-        res = deserialize_text(res)
-        res = arc4("bpPVcKMFJXq", res)
-        res = res[::-1]
-        res = deserialize_text(res)
-        res = arc4("eLWogkrHstP", res)
-        res = vrf_shift(res, "REG859WSLiQkKHP", "kHWPSL5RKG9Ei8Q")
-        res = res[::-1]
-        res = vrf_shift(res, "Ip64xWVntvoj", "4pjVI6otnvxW")
-        res = deserialize_text(res)
-        res = arc4("V4pBzCPyMSwqx", res)
-        return res
-
-
-    headers = {
-        'User-Agent': _EDGE_UA,
-        'Referer': slink
-    }
-
-    # keys = json.loads(control.getSetting('keys.vidplay'))
-    mid = slink.split('?')[0].split('/')[-1]
-    m = generate_mid(mid)
-    h = serialize_text(arc4("BvxAphQAmWO9BIJ8", mid))
-    murl = parse.urljoin(slink, '/mediainfo/{}?{}&h={}'.format(m, slink.split('?')[-1], h))
-    s = requests.get(murl, headers=headers).json()
-    s = json.loads(decode_vurl(s.get("result")))
-    if isinstance(s, dict):
-        uri = s.get('sources')[0].get('file')
-        rurl = parse.urljoin(murl, '/')
-        uri += '|Referer={0}&Origin={1}&User-Agent=iPad'.format(rurl, rurl[:-1])
-        subs = s.get('tracks')
-        if subs:
-            subs = [{'url': x.get('file'), 'lang': x.get('label')} for x in subs if x.get('kind') == 'captions']
-            if subs:
-                uri = {'url': uri, 'subs': subs}
-        return uri
-
-
 def __extract_kwik(url, page_content, referer=None):
     page_content += __get_packed_data(page_content)
     r = re.search(r"const\s*source\s*=\s*'([^']+)", page_content)
@@ -243,7 +117,11 @@ def __extract_okru(url, page_content, referer=None):
     aurl = "http://www.ok.ru/dk"
     data = {'cmd': 'videoPlayerMetadata', 'mid': media_id}
     data = parse.urlencode(data)
-    html = requests.post(aurl, data=data)
+    headers = {
+        'User-Agent': _EDGE_UA,
+        'Referer': url
+    }
+    html = requests.post(aurl, data=data, headers=headers)
     json_data = html.json()
     if 'error' in json_data:
         return
@@ -290,8 +168,7 @@ def __extract_fusevideo(url, page_content, referer=None):
     r = re.findall(r'<script\s*src="([^"]+)', page_content)
     if r:
         jurl = r[-1]
-        headers = {'Referer': url}
-        # js = client.request(jurl, referer=url)
+        headers = {'User-Agent': _EDGE_UA, 'Referer': url}
         js = requests.get(jurl, headers=headers).text
         match = re.search(r'n\s*=\s*atob\("([^"]+)', js)
         if match:
@@ -313,12 +190,9 @@ def __extract_dood(url, page_content, referer=None):
         host, media_id = re.findall(pattern, url)[0]
         token = match.group(2)
         nurl = 'https://{0}{1}'.format(host, match.group(1))
-        headers = {'Referer': url}
-        # html = client.request(nurl, referer=url)
+        headers = {'User-Agent': _EDGE_UA, 'Referer': url}
         html = requests.get(nurl, headers=headers).text
         if html != '{}':
-            headers = {'User-Agent': _EDGE_UA,
-                       'Referer': url}
             return dood_decode(html) + token + str(int(time.time() * 1000)) + __append_headers(headers)
 
 
@@ -396,7 +270,11 @@ def __extract_goload(url, page_content, referer=None):
         params = _decrypt(r.group(1), keys[0], iv)
         eurl = 'https://{0}/encrypt-ajax.php?id={1}&alias={2}'.format(
             host, _encrypt(media_id, keys[0], iv), params)
-        r = requests.get(eurl)
+        headers = {
+            'User-Agent': _EDGE_UA,
+            'Referer': url
+        }
+        r = requests.get(eurl, headers=headers)
         response = r.json().get('data') if r.ok else None
         if response:
             result = _decrypt(response, keys[1], iv)
@@ -429,7 +307,8 @@ def __register_extractor(urls, function, url_preloader=None, datas=None):
 
 
 def get_sub(sub_url, sub_lang):
-    content = requests.get(sub_url).text
+    headers = {'User-Agent': _EDGE_UA}
+    content = requests.get(sub_url, headers=headers).text
     subtitle = xbmcvfs.translatePath('special://temp/')
     fname = f'TemporarySubs.{sub_lang}.srt'
     fpath = os.path.join(subtitle, fname)
@@ -453,15 +332,6 @@ def del_subs():
 __register_extractor(["https://www.mp4upload.com/",
                       "https://mp4upload.com/"],
                      __extract_mp4upload)
-
-__register_extractor(["https://vidplay.online/",
-                      "https://mcloud.bz/",
-                      "https://megaf.cc",
-                      "https://a9bfed0818.nl/",
-                      "https://vid142.site/",
-                      "https://vid2a41.site/",
-                      "https://vid1a52.site/"],
-                     __extract_vidplay)
 
 __register_extractor(["https://kwik.cx/",
                       "https://kwik.si/"],
