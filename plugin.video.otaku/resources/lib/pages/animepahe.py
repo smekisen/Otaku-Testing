@@ -1,40 +1,35 @@
 import json
 import pickle
-import requests
 
 from bs4 import BeautifulSoup, SoupStrainer
 from resources.lib.ui import control, database, source_utils
 from resources.lib.ui.BrowserBase import BrowserBase
 
 
-class sources(BrowserBase):
+class Sources(BrowserBase):
     _BASE_URL = 'https://animepahe.ru/'
     _headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.62',
         'Referer': _BASE_URL,
         'Cookie': '__ddg1_=PZYJSmACHBBQGP6auJU9; __ddg2_=hxAe1bBqtlUhMFik'
     }
 
-    def get_sources(self, anilist_id, episode, get_backup):
-        show = database.get_show(anilist_id)
+    def get_sources(self, mal_id, episode):
+        show = database.get_show(mal_id)
         kodi_meta = pickle.loads(show.get('kodi_meta'))
         title = kodi_meta.get('name')
         title = self._clean_title(title)
-        etitle = kodi_meta.get('ename')
-        etitle = self._clean_title(etitle)
         params = {'m': 'search',
                   'q': title}
-        headers = self._headers
-        headers.update({'X-Requested-With': 'XMLHttpRequest'})
         r = database.get(
-            requests.get,
+            self._get_request,
             8,
             self._BASE_URL + 'api',
-            params=params,
-            headers=headers
+            data=params,
+            headers=self._headers,
+            XHR=True
         )
         try:
-            sitems = r.json().get('data')
+            sitems = json.loads(r).get('data')
         except json.JSONDecodeError:
             return []
 
@@ -42,13 +37,14 @@ class sources(BrowserBase):
             title = title.split(':')[0]
             params.update({'q': title})
             r = database.get(
-                requests.get,
+                self._get_request,
                 8,
                 self._BASE_URL + 'api',
-                params=params,
-                headers=headers,
+                data=params,
+                headers=self._headers,
+                XHR=True
             )
-            sitems = r.json().get('data')
+            sitems = json.loads(r).get('data')
 
         all_results = []
         if sitems:
@@ -56,11 +52,6 @@ class sources(BrowserBase):
                 items = [x for x in sitems if title.lower() in x.get('title').lower()]
             else:
                 items = [x for x in sitems if (title.lower() + '  ') in (x.get('title').lower() + '  ')]
-            if not items:
-                if etitle[-1].isdigit():
-                    items = [x for x in sitems if etitle.lower() in x.get('title').lower()]
-                else:
-                    items = [x for x in sitems if (etitle.lower() + '  ') in (x.get('title').lower() + '  ')]
             if not items:
                 items = sitems
             if items:
@@ -76,8 +67,6 @@ class sources(BrowserBase):
         if big_series:
             page += int(e_num / 30)
 
-        headers = self._headers
-        headers.update({'X-Requested-With': 'XMLHttpRequest'})
         params = {
             'm': 'release',
             'id': slug,
@@ -85,13 +74,15 @@ class sources(BrowserBase):
             'page': page
         }
         r = database.get(
-            requests.get,
+            self._get_request,
             8,
             self._BASE_URL + 'api',
             data=params,
-            headers=headers
+            headers=self._headers,
+            XHR=True
         )
-        items = r.json().get('data')
+        r = json.loads(r)
+        items = r.get('data')
         items = sorted(items, key=lambda x: x.get('episode'))
 
         if items[0].get('episode') > 1 and not big_series:
@@ -106,16 +97,16 @@ class sources(BrowserBase):
             items = mdiv.find_all('button')
 
             for item in items:
-                if any(x in item.get('data-src').lower() for x in control.enabled_embeds()):
+                if any(x in item.get('data-src').lower() for x in self.embeds()):
                     qual = int(item.get('data-resolution'))
                     if qual < 577:
-                        quality = 'SD'
+                        quality = 3
                     elif qual < 721:
-                        quality = '720p'
+                        quality = 2
                     elif qual < 1081:
-                        quality = '1080p'
+                        quality = 1
                     else:
-                        quality = '4K'
+                        quality = 0
                     source = {
                         'release_title': '{0} - Ep {1}'.format(title, episode),
                         'hash': item.get('data-src'),
@@ -124,6 +115,7 @@ class sources(BrowserBase):
                         'debrid_provider': '',
                         'provider': 'animepahe',
                         'size': 'NA',
+                        'byte_size': 0,
                         'info': [source_utils.get_embedhost(item.get('data-src')), 'DUB' if item.get('data-audio') == 'eng' else 'SUB'],
                         'lang': 2 if item.get('data-audio') == 'eng' else 0
                     }
