@@ -22,7 +22,7 @@ _You can install it via repository to provide automatic updates (future updates 
 _or install it manually in the following order (future updates should not be installed manually and these download links could be outdated)_
 
 - [context.otaku](https://github.com/Goldenfreddy0703/repository.otaku.testing/raw/master/repo/zips/context.otaku/context.otaku-1.0.19.zip)
-- [plugin.video.otaku](https://github.com/Goldenfreddy0703/repository.otaku.testing/raw/master/repo/zips/plugin.video.otaku/plugin.video.otaku-5.1.0.zip)
+- [plugin.video.otaku.testing](https://github.com/Goldenfreddy0703/repository.otaku.testing/raw/master/repo/zips/plugin.video.otaku.testing/plugin.video.otaku.testing-5.1.0.zip)
 
 After each update, it is recommended that you clear cache/rebuild database to make sure changes take effect.
 
@@ -39,6 +39,9 @@ If you guys are having problems with Otaku, please feel free to contact me or ta
 **_Optional_**:
 - Accounts: Adding an Easy News Debrid Provider.
 - Accounts: Adding an Offcloud Debrid Provider.
+
+**_Quality_**:
+- Fanart Stuff for Watchlist
 
 ## Help needed with maintaining
 
