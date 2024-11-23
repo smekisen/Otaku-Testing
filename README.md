@@ -40,9 +40,6 @@ If you guys are having problems with Otaku, please feel free to contact me or ta
 - Accounts: Adding an Easy News Debrid Provider.
 - Accounts: Adding an Offcloud Debrid Provider.
 
-**_Quality_**:
-- Fanart Stuff for Watchlist
-
 ## Help needed with maintaining
 
 I am very clueless on this project currently cause this addon was made by SwagOtaku who has done a very great job creating this addon. Be aware that this is a community driven project, so feel free to submit PR's yourself to improve the code and/or help others with support on the issues etc. If you're willing to really participate in the development, please contact me so I can give you write access to the repo. I will do my best to maintain the project for SwagOtaku. Thanks for understanding!
