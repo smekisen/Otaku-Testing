@@ -117,9 +117,12 @@ def watchlist_to_update():
 def copy2clip(txt):
     platform = sys.platform
     if platform == 'win32':
-        command = 'echo %s|clip' % txt
-        os.system(command)
-        return True
+        try:
+            os.system('echo %s|clip' % txt)
+            return True
+        except AttributeError:
+            pass
+    return False
 
 
 def colorstr(text, color=None):
