@@ -1,6 +1,6 @@
 import threading
 
-from resources.lib.debrid import real_debrid, premiumize, all_debrid, debrid_link
+from resources.lib.debrid import real_debrid, premiumize, all_debrid, debrid_link, torbox
 from resources.lib.ui import control
 
 
@@ -10,11 +10,13 @@ class TorrentCacheCheck:
         self.realdebridCached = []
         self.all_debridCached = []
         self.debrid_linkCached = []
+        self.torboxCached = []
 
         self.premiumizeUnCached = []
         self.realdebridUnCached = []
         self.all_debridUnCached = []
         self.debrid_linkUnCached = []
+        self.torboxUnCached = []
         self.threads = []
 
     def torrentCacheCheck(self, torrent_list):
@@ -38,11 +40,16 @@ class TorrentCacheCheck:
             t.start()
             self.threads.append(t)
 
+        if control.torbox_enabled():
+            t = threading.Thread(target=self.torbox_worker, args=[torrent_list])
+            t.start()
+            self.threads.append(t)
+
         for i in self.threads:
             i.join()
 
-        cached_list = self.realdebridCached + self.premiumizeCached + self.all_debridCached + self.debrid_linkCached
-        uncashed_list = self.realdebridUnCached + self.premiumizeUnCached + self.all_debridUnCached + self.debrid_linkUnCached
+        cached_list = self.realdebridCached + self.premiumizeCached + self.all_debridCached + self.debrid_linkCached + self.torboxCached
+        uncashed_list = self.realdebridUnCached + self.premiumizeUnCached + self.all_debridUnCached + self.debrid_linkUnCached + self.torboxUnCached
         return cached_list, uncashed_list
 
     def all_debrid_worker(self, torrent_list):
