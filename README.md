@@ -21,7 +21,7 @@ _You can install it via repository to provide automatic updates (future updates 
 
 _or install it manually in the following order (future updates should not be installed manually and these download links could be outdated)_
 
-- [context.otaku](https://github.com/Goldenfreddy0703/repository.otaku.testing/raw/master/repo/zips/context.otaku/context.otaku-1.0.19.zip)
+- [context.otaku.testing](https://github.com/Goldenfreddy0703/repository.otaku.testing/raw/master/repo/zips/context.otaku.testing/context.otaku.testing-1.0.19.zip)
 - [plugin.video.otaku.testing](https://github.com/Goldenfreddy0703/repository.otaku.testing/raw/master/repo/zips/plugin.video.otaku.testing/plugin.video.otaku.testing-5.1.0.zip)
 
 After each update, it is recommended that you clear cache/rebuild database to make sure changes take effect.
