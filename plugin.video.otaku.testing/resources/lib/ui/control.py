@@ -90,6 +90,10 @@ def premiumize_enabled():
     return True if getSetting('premiumize.token') != '' and getBool('premiumize.enabled') else False
 
 
+def torbox_enabled():
+    return True if getSetting('torbox.token') != '' and getBool('torbox.enabled') else False
+
+
 def myanimelist_enabled():
     return True if getSetting('mal.token') != '' and getBool('mal.enabled') else False
 

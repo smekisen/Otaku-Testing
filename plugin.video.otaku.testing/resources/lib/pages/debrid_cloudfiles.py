@@ -4,7 +4,7 @@ import threading
 
 from resources.lib.ui import source_utils
 from resources.lib.ui.BrowserBase import BrowserBase
-from resources.lib.debrid import real_debrid, premiumize, all_debrid
+from resources.lib.debrid import real_debrid, premiumize, all_debrid, torbox
 
 
 class Sources(BrowserBase):
@@ -23,6 +23,10 @@ class Sources(BrowserBase):
             self.threads.append(t)
         if debrid.get('all_debrid'):
             t = threading.Thread(target=self.alldebrid_cloud_inspection, args=(query, episode,))
+            t.start()
+            self.threads.append(t)
+        if debrid.get('torbox'):
+            t = threading.Thread(target=self.torbox_cloud_inspection, args=(query, episode,))
             t.start()
             self.threads.append(t)
         for i in self.threads:

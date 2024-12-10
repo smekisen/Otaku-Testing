@@ -756,7 +756,7 @@
                         <dependency type="visible" setting="premiumize.enabled">true</dependency>
                     </dependencies>
                 </setting>
-                <setting id="alldebrid.cloudInspection" type="boolean" label="30192" help="">
+                <setting id="ad.cloudInspection" type="boolean" label="30192" help="">
                     <level>0</level>
                     <default>false</default>
                     <control type="toggle"/>
@@ -764,6 +764,14 @@
                         <dependency type="visible" setting="alldebrid.enabled">true</dependency>
                     </dependencies>
                 </setting>
+                <setting id="tb.cloudInspection" type="boolean" label="30624" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+                    <dependencies>
+                        <dependency type="visible" setting="torbox.enabled">true</dependency>
+                    </dependencies>
+				</setting>
             </group>
 
             <!-- Local Scrapping -->
@@ -1598,6 +1606,59 @@
                     </control>
                     <dependencies>
                         <dependency type="visible" setting="dl.enabled">true</dependency>
+                    </dependencies>
+                </setting>
+            </group>
+
+            <!-- TorBox -->
+            <group id="5" label="30618" help="">
+                <setting id="torbox.enabled" type="boolean" label="30619" help="">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="torbox.username" type="string" label="30620" help="">
+                    <level>0</level>
+                    <default/>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                    </constraints>
+                        <control type="edit" format="string"/>
+                    <enable>false</enable>
+                    <dependencies>
+                        <dependency type="visible" setting="torbox.enabled">true</dependency>
+                    </dependencies>
+                </setting>
+                <setting id="torbox.auth.status" type="string" label="30621" help="">
+                    <level>0</level>
+                    <default/>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="edit" format="string"/>
+                    <enable>false</enable>
+                    <dependencies>
+                        <dependency type="visible" setting="torbox.enabled">true</dependency>
+                    </dependencies>
+                </setting>
+                <setting id="torbox.auth_start" type="action" label="30622" help="">
+                    <level>0</level>
+                    <data>RunPlugin(plugin://plugin.video.otaku.testing/auth/torbox)</data>
+                    <control type="button" format="action">
+                        <close>true</close>
+                    </control>
+                    <dependencies>
+                        <dependency type="visible" setting="torbox.enabled">true</dependency>
+                    </dependencies>
+                </setting>
+                <setting id="torbox.refresh.token" type="action" label="30623" help="">
+                    <level>0</level>
+                    <data>RunPlugin(plugin://plugin.video.otaku.testing/refresh/torbox)</data>
+                    <control type="button" format="action">
+                        <close>true</close>
+                    </control>
+                    <dependencies>
+                        <dependency type="visible" setting="torbox.enabled">true</dependency>
                     </dependencies>
                 </setting>
             </group>

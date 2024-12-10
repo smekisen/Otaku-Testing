@@ -69,7 +69,7 @@ class Sources(GetSources):
         control.setInt('aniwave.skipoutro.start', -1)
         control.setInt('aniwave.skipoutro.end', -1)
 
-        if control.real_debrid_enabled() or control.all_debrid_enabled() or control.debrid_link_enabled() or control.premiumize_enabled():
+        if control.real_debrid_enabled() or control.all_debrid_enabled() or control.debrid_link_enabled() or control.premiumize_enabled() or control.torbox_enabled():
             t = threading.Thread(target=self.user_cloud_inspection, args=(query, mal_id, episode))
             t.start()
             self.threads.append(t)
@@ -233,8 +233,10 @@ class Sources(GetSources):
             debrid['real_debrid'] = True
         if control.premiumize_enabled() and control.getBool('premiumize.cloudInspection'):
             debrid['premiumize'] = True
-        if control.all_debrid_enabled() and control.getBool('alldebrid.cloudInspection'):
+        if control.all_debrid_enabled() and control.getBool('ad.cloudInspection'):
             debrid['all_debrid'] = True
+        if control.torbox_enabled() and control.getBool('tb.cloudInspection'):
+            debrid['torbox'] = True
         self.cloud_files += debrid_cloudfiles.Sources().get_sources(debrid, query, episode)
         self.remainingProviders.remove('Cloud Inspection')
 
